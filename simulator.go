@@ -6,6 +6,11 @@ type SimulatorConfig struct {
 	SimRecordID int    `json:"sim_record_id,omitempty"`
 }
 
+type Simulator struct {
+	httpClient   *HttpClient
+	simulationId string
+}
+
 func NewSimulatorFromConfig(hCli *HttpClient, cfg SimulatorConfig) (*Simulator, error) {
 	cloneCli := hCli.Clone()
 
@@ -33,12 +38,6 @@ func NewSimulatorFromSim(hCli *HttpClient, simId, simAddr string) (*Simulator, e
 	}
 
 	return simtor, nil
-}
-
-type Simulator struct {
-	httpClient *HttpClient
-
-	simulationId string
 }
 
 func (s *Simulator) initFromConfig(simConfig SimulatorConfig) error {
@@ -70,19 +69,41 @@ func (s *Simulator) initFromSim(simId, simAddr string) error {
 	return nil
 }
 
-func (s *Simulator) Stop() error {
-	var reply StopReq
+func (s *Simulator) Step() (*StepRes, error) {
+	var reply StepRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/step",
+		&StepReq{SimulationID: s.simulationId},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
 
+func (s *Simulator) Stop() error {
+	var reply StopRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/stop",
-		&StopReq{
-			SimulationId: s.simulationId,
-		},
+		&StopReq{SimulationId: s.simulationId},
 		&reply,
 	)
 	if err != nil {
 		return err
 	}
-
 	return nil
+}
+
+func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
+	var reply ResetRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/reset",
+		&ResetReq{SimulationID: s.simulationId, ResetTrafficFlow: resetTrafficFlow},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
 }

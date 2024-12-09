@@ -17,3 +17,20 @@ type StopReq struct {
 
 type StopRes struct {
 }
+
+type StepReq struct {
+	SimulationID string `json:"simulation_id"`
+}
+
+type StepRes struct {
+	// Define fields according to the expected response structure
+}
+
+type ResetReq struct {
+	SimulationID     string `json:"simulation_id"`
+	ResetTrafficFlow bool   `json:"reset_traffic_flow"`
+}
+
+type ResetRes struct {
+	// Define fields according to the expected response structure
+}
