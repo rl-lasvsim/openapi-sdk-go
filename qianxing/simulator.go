@@ -63,7 +63,7 @@ func (s *Simulator) initFromConfig(simConfig SimulatorConfig) error {
 }
 
 func (s *Simulator) initFromSim(simId, simAddr string) error {
-	s.httpClient.headers["simulation_id"] = simId
+	s.httpClient.headers["x-md-simulation_id"] = simId
 	s.httpClient.headers["x-md-rl-direct-addr"] = simAddr
 	s.simulationId = simId
 	return nil
