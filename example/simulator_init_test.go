@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	qianxing "github.com/risenlighten-qianxing/openapi-sdk-go"
+	qianxing "github.com/risenlighten-qianxing/openapi-sdk-go/qianxing"
 )
 
 func TestSimulatorInit(t *testing.T) {
