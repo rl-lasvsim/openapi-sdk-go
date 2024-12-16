@@ -1,4 +1,4 @@
-package qianxing
+package lasvsim
 
 // Client represents the main client for the API
 type Client struct {
