@@ -8,7 +8,7 @@ type Client struct {
 
 	// TrainTask   *TrainTask
 	// Resources   *Resources
-	// ProcessTask *ProcessTask
+	ProcessTask *ProcessTask
 	// Simulator   *Simulator
 }
 
@@ -26,7 +26,7 @@ func NewClient(config *HttpConfig) *Client {
 func (c *Client) initCommonClient(hCli *HttpClient) {
 	// c.TrainTask = &TrainTask{client: NewHttpClient(config)}
 	// c.Resources = &Resources{client: NewHttpClient(config)}
-	// c.ProcessTask = &ProcessTask{client: NewHttpClient(config)}
+	c.ProcessTask = NewProcessTask(c.httpClient)
 }
 
 // InitSimulatorFromConfig initializes a simulator from the given configuration
