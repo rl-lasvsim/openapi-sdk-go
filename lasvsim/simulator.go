@@ -1,4 +1,4 @@
-package qianxing
+package lasvsim
 
 type SimulatorConfig struct {
 	ScenID      string `json:"scen_id,omitempty"`

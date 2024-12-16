@@ -4,7 +4,7 @@ import (
 	"os"
 	"testing"
 
-	qianxing "github.com/risenlighten-qianxing/openapi-sdk-go/qianxing"
+	qianxing "github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
 )
 
 func TestSimulatorInit(t *testing.T) {

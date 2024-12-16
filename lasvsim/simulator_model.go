@@ -1,4 +1,4 @@
-package qianxing
+package lasvsim
 
 type InitReq struct {
 	ScenID      string `json:"scen_id,omitempty"`
