@@ -1,4 +1,8 @@
-package lasvsim
+package simulation
+
+import (
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
+)
 
 type SimulatorConfig struct {
 	ScenID      string `json:"scen_id,omitempty"`
@@ -7,11 +11,11 @@ type SimulatorConfig struct {
 }
 
 type Simulator struct {
-	httpClient   *HttpClient
+	httpClient   *httpclient.HttpClient
 	simulationId string
 }
 
-func NewSimulatorFromConfig(hCli *HttpClient, cfg SimulatorConfig) (*Simulator, error) {
+func NewSimulatorFromConfig(hCli *httpclient.HttpClient, cfg SimulatorConfig) (*Simulator, error) {
 	cloneCli := hCli.Clone()
 
 	simtor := &Simulator{
@@ -26,7 +30,7 @@ func NewSimulatorFromConfig(hCli *HttpClient, cfg SimulatorConfig) (*Simulator, 
 	return simtor, nil
 }
 
-func NewSimulatorFromSim(hCli *HttpClient, simId, simAddr string) (*Simulator, error) {
+func NewSimulatorFromSim(hCli *httpclient.HttpClient, simId, simAddr string) (*Simulator, error) {
 	cloneCli := hCli.Clone()
 	simtor := &Simulator{
 		httpClient: cloneCli,
@@ -63,8 +67,8 @@ func (s *Simulator) initFromConfig(simConfig SimulatorConfig) error {
 }
 
 func (s *Simulator) initFromSim(simId, simAddr string) error {
-	s.httpClient.headers["x-md-simulation_id"] = simId
-	s.httpClient.headers["x-md-rl-direct-addr"] = simAddr
+	s.httpClient.Headers["x-md-simulation_id"] = simId
+	s.httpClient.Headers["x-md-rl-direct-addr"] = simAddr
 	s.simulationId = simId
 	return nil
 }

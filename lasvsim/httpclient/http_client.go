@@ -1,4 +1,4 @@
-package lasvsim
+package httpclient
 
 import (
 	"bytes"
@@ -38,7 +38,7 @@ type Option func(*HttpClient)
 func WithHeaders(headers map[string]string) Option {
 	return func(c *HttpClient) {
 		for k, v := range headers {
-			c.headers[k] = v
+			c.Headers[k] = v
 		}
 	}
 }
@@ -46,7 +46,7 @@ func WithHeaders(headers map[string]string) Option {
 // HttpClient is the HTTP client for the API
 type HttpClient struct {
 	config  *HttpConfig
-	headers map[string]string
+	Headers map[string]string
 	client  *http.Client
 }
 
@@ -54,12 +54,12 @@ type HttpClient struct {
 func NewHttpClient(config *HttpConfig, opts ...Option) *HttpClient {
 	client := &HttpClient{
 		config:  config,
-		headers: make(map[string]string),
+		Headers: make(map[string]string),
 		client:  &http.Client{},
 	}
 
 	// Set default Authorization header
-	client.headers["Authorization"] = "Bearer " + config.Token
+	client.Headers["Authorization"] = "Bearer " + config.Token
 
 	// Apply options
 	for _, opt := range opts {
@@ -73,7 +73,7 @@ func (c *HttpClient) Clone() *HttpClient {
 	clone := &HttpClient{
 		config:  c.config,
 		client:  &http.Client{},
-		headers: c.headers,
+		Headers: c.Headers,
 	}
 
 	return clone
@@ -96,7 +96,7 @@ func (c *HttpClient) Get(path string, params map[string]string, out any) error {
 		return err
 	}
 
-	for k, v := range c.headers {
+	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
 
@@ -116,7 +116,7 @@ func (c *HttpClient) Post(path string, data, out any) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	for k, v := range c.headers {
+	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
 
