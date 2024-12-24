@@ -4,6 +4,7 @@ import (
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/processtask"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/resource"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simrecord"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simulation"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/traintask"
 )
@@ -18,6 +19,7 @@ type Client struct {
 	Resources   *resource.Resource
 	ProcessTask *processtask.ProcessTask
 	Simulator   *simulation.Simulator
+	SimRecord   *simrecord.SimRecord
 }
 
 // NewClient creates a new API client
@@ -35,6 +37,7 @@ func (c *Client) initCommonClient() {
 	c.TrainTask = traintask.NewTrainTask(c.httpClient)
 	c.Resources = resource.NewResource(c.httpClient)
 	c.ProcessTask = processtask.NewProcessTask(c.httpClient)
+	c.SimRecord = simrecord.NewSimRecord(c.httpClient)
 }
 
 // InitSimulatorFromConfig initializes a simulator from the given configuration

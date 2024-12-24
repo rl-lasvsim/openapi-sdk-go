@@ -19,6 +19,7 @@ type APIError struct {
 	StatusCode int
 	Message    interface{}
 	URL        string
+	Reason     string
 }
 
 func (e *APIError) Error() string {
@@ -136,16 +137,27 @@ func (c *HttpClient) doRequest(req *http.Request, out any) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		e := &APIError{
+			StatusCode: resp.StatusCode,
+			// Message:    errResp,
+			URL: req.Method + "," + req.URL.String(),
+		}
+
 		var errResp interface{}
 		if err := json.Unmarshal(body, &errResp); err != nil {
 			errResp = string(body)
 		}
-		return &APIError{
-			StatusCode: resp.StatusCode,
-			Message:    errResp,
-			URL:        req.Method + "," + req.URL.String(),
+
+		e.Message = errResp
+		if detail, ok := errResp.(map[string]interface{}); ok {
+			if v, has := detail["reason"]; has {
+				e.Reason = v.(string)
+			}
 		}
+
+		return e
 	}
+
 	if out == nil {
 		return nil
 	}
@@ -153,4 +165,20 @@ func (c *HttpClient) doRequest(req *http.Request, out any) error {
 	err = json.Unmarshal(body, out)
 
 	return err
+}
+
+type ErrorReason string
+
+var CALL_GRPC_ERR ErrorReason = "CALL_GRPC_ERR"
+var PARAM_UNVAILABLE ErrorReason = "PARAM_UNVAILABLE"
+var NOT_EXIST ErrorReason = "NOT_EXIST"
+var GET_HEADER_ERR ErrorReason = "GET_HEADER_ERR"
+var SET_HEADER_ERR ErrorReason = "SET_HEADER_ERR"
+var SET_KV_ERR ErrorReason = "SET_KV_ERR"
+
+func MatchErrorReason(err error, errStr ErrorReason) bool {
+	if comma, ok := err.(*APIError); ok {
+		return comma.Reason == string(errStr)
+	}
+	return false
 }
