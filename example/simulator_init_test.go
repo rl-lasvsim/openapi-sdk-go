@@ -2,6 +2,7 @@ package example
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	qianxing "github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
@@ -11,15 +12,13 @@ import (
 
 func TestSimulatorInit(t *testing.T) {
 	cli := qianxing.NewClient(&httpclient.HttpConfig{
-		// Endpoint: os.Getenv("QX_ENDPOINT"),
-		// Token:    os.Getenv("QX_TOKEN"),
-		Endpoint: "http://8.146.201.197:30080/dev",
-		Token:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjI3LCJvaWQiOjI1LCJuYW1lIjoi5byg5LiJIiwiaWRlbnRpdHkiOiJub3JtYWwiLCJwZXJtaXNzaW9ucyI6W10sImlzcyI6InVzZXIiLCJzdWIiOiJMYXNWU2ltIiwiZXhwIjoxNzM1MTk3NzkzLCJuYmYiOjE3MzQ1OTI5OTMsImlhdCI6MTczNDU5Mjk5MywianRpIjoiMjcifQ.NErDniRRuZFsvG7Dn623E4CHCIxjqs-7KvMPQ1E0WCI",
+		Endpoint: os.Getenv("QX_ENDPOINT"),
+		Token:    os.Getenv("QX_TOKEN"),
 	})
 
 	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{
 		ScenID:  "78533880676610",
-		ScenVer: "0",
+		ScenVer: "2",
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -80,7 +79,7 @@ func TestSimulatorInit(t *testing.T) {
 	}
 	t.Log(GetVehicleNavigationInfo)
 
-	for i := 0; i < 50; i++ {
+	for i := 0; i < 10; i++ {
 		res, err := simulator.Step()
 		if err != nil {
 			t.Fatal(err)
@@ -88,15 +87,27 @@ func TestSimulatorInit(t *testing.T) {
 		t.Log(res)
 	}
 
+	SetVehicleDestinationRes, err := simulator.SetVehicleDestination("测试车辆1", &simulation.Point{0.1, 0.1, 0.1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(SetVehicleDestinationRes)
+
+	SetVehicleBaseInfoRes, err := simulator.SetVehicleBaseInfo("测试车辆1", &simulation.ObjBaseInfo{0.1, 0.1, 0.1, 0.1}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(SetVehicleBaseInfoRes)
+
+	var acc float64 = 0.11
+	SetVehicleControlInfoRes, err := simulator.SetVehicleControlInfo("测试车辆1", &acc, &acc)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(SetVehicleControlInfoRes)
+
 	err = simulator.Stop()
 	if err != nil {
 		t.Fatal(err)
 	}
-
-	// resource 测试
-	hdMapRes, err := cli.Resources.GetHdMap("78533880676610", "0")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Log(*hdMapRes.Data)
 }
