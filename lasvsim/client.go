@@ -1,40 +1,51 @@
 package lasvsim
 
+import (
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/processtask"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/resource"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simrecord"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simulation"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/traintask"
+)
+
 // Client represents the main client for the API
 type Client struct {
-	config *HttpConfig
+	config *httpclient.HttpConfig
 
-	httpClient *HttpClient
+	httpClient *httpclient.HttpClient
 
-	// TrainTask   *TrainTask
-	// Resources   *Resources
-	// ProcessTask *ProcessTask
-	// Simulator   *Simulator
+	TrainTask   *traintask.TrainTask
+	Resources   *resource.Resource
+	ProcessTask *processtask.ProcessTask
+	Simulator   *simulation.Simulator
+	SimRecord   *simrecord.SimRecord
 }
 
 // NewClient creates a new API client
-func NewClient(config *HttpConfig) *Client {
+func NewClient(config *httpclient.HttpConfig) *Client {
 	client := &Client{
 		config:     config,
-		httpClient: NewHttpClient(config),
+		httpClient: httpclient.NewHttpClient(config),
 	}
-	client.initCommonClient(client.httpClient)
+	client.initCommonClient()
 	return client
 }
 
 // initCommonClient initializes the common client components
-func (c *Client) initCommonClient(hCli *HttpClient) {
-	// c.TrainTask = &TrainTask{client: NewHttpClient(config)}
-	// c.Resources = &Resources{client: NewHttpClient(config)}
-	// c.ProcessTask = &ProcessTask{client: NewHttpClient(config)}
+func (c *Client) initCommonClient() {
+	c.TrainTask = traintask.NewTrainTask(c.httpClient)
+	c.Resources = resource.NewResource(c.httpClient)
+	c.ProcessTask = processtask.NewProcessTask(c.httpClient)
+	c.SimRecord = simrecord.NewSimRecord(c.httpClient)
 }
 
 // InitSimulatorFromConfig initializes a simulator from the given configuration
-func (c *Client) InitSimulatorFromConfig(simConfig SimulatorConfig) (*Simulator, error) {
-	return NewSimulatorFromConfig(c.httpClient, simConfig)
+func (c *Client) InitSimulatorFromConfig(simConfig simulation.SimulatorConfig) (*simulation.Simulator, error) {
+	return simulation.NewSimulatorFromConfig(c.httpClient, simConfig)
 }
 
 // InitSimulatorFromSim initializes a simulator from existing simulation
-func (c *Client) InitSimulatorFromSim(simId string, addr string) (*Simulator, error) {
-	return NewSimulatorFromSim(c.httpClient, simId, addr)
+func (c *Client) InitSimulatorFromSim(simId string, addr string) (*simulation.Simulator, error) {
+	return simulation.NewSimulatorFromSim(c.httpClient, simId, addr)
 }
