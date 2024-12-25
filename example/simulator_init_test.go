@@ -5,13 +5,13 @@ import (
 	"os"
 	"testing"
 
-	qianxing "github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
+	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
 	httpclient "github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
 	simulation "github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simulation"
 )
 
 func TestSimulatorInit(t *testing.T) {
-	cli := qianxing.NewClient(&httpclient.HttpConfig{
+	cli := lasvsim.NewClient(&httpclient.HttpConfig{
 		Endpoint: os.Getenv("QX_ENDPOINT"),
 		Token:    os.Getenv("QX_TOKEN"),
 	})
