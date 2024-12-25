@@ -5,9 +5,9 @@ import (
 )
 
 type SimulatorConfig struct {
-	ScenID      string `json:"scen_id,omitempty"`
-	ScenVer     string `json:"scen_ver,omitempty"`
-	SimRecordID int    `json:"sim_record_id,omitempty"`
+	ScenID      string `json:"scen_id"`
+	ScenVer     string `json:"scen_ver"`
+	SimRecordID string `json:"sim_record_id"`
 }
 
 type Simulator struct {
