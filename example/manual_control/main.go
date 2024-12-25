@@ -1,10 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 
+	"github.com/gdamore/tcell"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simulation"
@@ -37,9 +37,6 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Enter input (w/s/a/d, press Ctrl+C to exit):")
-
 	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{
 		ScenID:      newRecord.ScenId,
 		ScenVer:     newRecord.ScenVer,
@@ -51,29 +48,55 @@ func run(cmd *cobra.Command, args []string) {
 	}
 	// 最后停止仿真
 	defer simulator.Stop()
+	runInteractive(simulator)
+}
+
+func runInteractive(simulator *simulation.Simulator) {
+	s, err := tcell.NewScreen()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	if err := s.Init(); err != nil {
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		os.Exit(1)
+	}
+	defer s.Fini()
+
+	defStyle := tcell.StyleDefault.Background(tcell.ColorBlack).Foreground(tcell.ColorWhite)
+	s.SetStyle(defStyle)
+	s.Clear()
+
+	printStr(s, 0, 0, defStyle, "Enter input (w/s/a/d, press Ctrl+C to exit):")
+	s.Show()
 
 	for {
-		input, _ := reader.ReadString('\n')
-		// 去除换行符
-		input = input[:len(input)-1]
-
-		switch input {
-		case "w":
-			fmt.Println("Moving Up (w)")
-			// 执行向上移动的逻辑
-		case "s":
-			fmt.Println("Moving Down (s)")
-			// 执行向下移动的逻辑
-		case "a":
-			fmt.Println("Moving Left (a)")
-			// 执行向左移动的逻辑
-		case "d":
-			fmt.Println("Moving Right (d)")
-			// 执行向右移动的逻辑
-		case "": // 处理只按回车的情况
-			continue
-		default:
-			fmt.Println("Invalid input. Please use w, s, a, or d.")
+		ev := s.PollEvent()
+		switch ev := ev.(type) {
+		case *tcell.EventKey:
+			if ev.Key() == tcell.KeyCtrlC {
+				return
+			}
+			switch ev.Rune() {
+			case 'w':
+				printStr(s, 0, 1, defStyle, "Moving Up (w)")
+			case 's':
+				printStr(s, 0, 1, defStyle, "Moving Down (s)")
+			case 'a':
+				printStr(s, 0, 1, defStyle, "Moving Left (a)")
+			case 'd':
+				printStr(s, 0, 1, defStyle, "Moving Right (d)")
+			default:
+				printStr(s, 0, 1, defStyle, "Invalid input.")
+			}
+			s.Show()
 		}
+	}
+}
+
+func printStr(s tcell.Screen, x, y int, style tcell.Style, str string) {
+	for _, r := range str {
+		s.SetContent(x, y, r, nil, style)
+		x++
 	}
 }
