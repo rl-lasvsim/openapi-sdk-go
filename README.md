@@ -280,7 +280,7 @@ type Client struct {
 │   ├── simrecord/     # 仿真记录相关实现
 │   ├── simulation/    # 仿真功能实现
 │   └── traintask/     # 训练任务相关实现
-└── example/           # 示例代码
+└── examples/           # 示例代码
     ├── go.mod         # 示例模块定义
     ├── go.sum         # 模块依赖校验
     ├── simulator_init_test.go  # 仿真器初始化测试

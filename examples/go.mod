@@ -1,4 +1,4 @@
-module github.com/rl-lasvsim/openapi-sdk-go/example
+module github.com/rl-lasvsim/openapi-sdk-go/examples
 
 go 1.19
 
