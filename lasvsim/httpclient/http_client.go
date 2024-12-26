@@ -1,4 +1,4 @@
-package qianxing
+package httpclient
 
 import (
 	"bytes"
@@ -19,6 +19,7 @@ type APIError struct {
 	StatusCode int
 	Message    interface{}
 	URL        string
+	Reason     string
 }
 
 func (e *APIError) Error() string {
@@ -38,7 +39,7 @@ type Option func(*HttpClient)
 func WithHeaders(headers map[string]string) Option {
 	return func(c *HttpClient) {
 		for k, v := range headers {
-			c.headers[k] = v
+			c.Headers[k] = v
 		}
 	}
 }
@@ -46,7 +47,7 @@ func WithHeaders(headers map[string]string) Option {
 // HttpClient is the HTTP client for the API
 type HttpClient struct {
 	config  *HttpConfig
-	headers map[string]string
+	Headers map[string]string
 	client  *http.Client
 }
 
@@ -54,12 +55,12 @@ type HttpClient struct {
 func NewHttpClient(config *HttpConfig, opts ...Option) *HttpClient {
 	client := &HttpClient{
 		config:  config,
-		headers: make(map[string]string),
+		Headers: make(map[string]string),
 		client:  &http.Client{},
 	}
 
 	// Set default Authorization header
-	client.headers["Authorization"] = "Bearer " + config.Token
+	client.Headers["Authorization"] = "Bearer " + config.Token
 
 	// Apply options
 	for _, opt := range opts {
@@ -73,7 +74,7 @@ func (c *HttpClient) Clone() *HttpClient {
 	clone := &HttpClient{
 		config:  c.config,
 		client:  &http.Client{},
-		headers: c.headers,
+		Headers: c.Headers,
 	}
 
 	return clone
@@ -96,7 +97,7 @@ func (c *HttpClient) Get(path string, params map[string]string, out any) error {
 		return err
 	}
 
-	for k, v := range c.headers {
+	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
 
@@ -116,7 +117,7 @@ func (c *HttpClient) Post(path string, data, out any) error {
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	for k, v := range c.headers {
+	for k, v := range c.Headers {
 		req.Header.Set(k, v)
 	}
 
@@ -136,16 +137,27 @@ func (c *HttpClient) doRequest(req *http.Request, out any) error {
 	}
 
 	if resp.StatusCode != http.StatusOK {
+		e := &APIError{
+			StatusCode: resp.StatusCode,
+			// Message:    errResp,
+			URL: req.Method + "," + req.URL.String(),
+		}
+
 		var errResp interface{}
 		if err := json.Unmarshal(body, &errResp); err != nil {
 			errResp = string(body)
 		}
-		return &APIError{
-			StatusCode: resp.StatusCode,
-			Message:    errResp,
-			URL:        req.Method + "," + req.URL.String(),
+
+		e.Message = errResp
+		if detail, ok := errResp.(map[string]interface{}); ok {
+			if v, has := detail["reason"]; has {
+				e.Reason = v.(string)
+			}
 		}
+
+		return e
 	}
+
 	if out == nil {
 		return nil
 	}
@@ -153,4 +165,20 @@ func (c *HttpClient) doRequest(req *http.Request, out any) error {
 	err = json.Unmarshal(body, out)
 
 	return err
+}
+
+type ErrorReason string
+
+var CALL_GRPC_ERR ErrorReason = "CALL_GRPC_ERR"
+var PARAM_UNVAILABLE ErrorReason = "PARAM_UNVAILABLE"
+var NOT_EXIST ErrorReason = "NOT_EXIST"
+var GET_HEADER_ERR ErrorReason = "GET_HEADER_ERR"
+var SET_HEADER_ERR ErrorReason = "SET_HEADER_ERR"
+var SET_KV_ERR ErrorReason = "SET_KV_ERR"
+
+func MatchErrorReason(err error, errStr ErrorReason) bool {
+	if comma, ok := err.(*APIError); ok {
+		return comma.Reason == string(errStr)
+	}
+	return false
 }
