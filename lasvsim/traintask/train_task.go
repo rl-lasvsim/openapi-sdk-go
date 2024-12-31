@@ -2,7 +2,6 @@ package traintask
 
 import (
 	"fmt"
-	"strconv"
 
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
 )
@@ -18,7 +17,7 @@ func NewTrainTask(hCli *httpclient.HttpClient) *TrainTask {
 func (p *TrainTask) GetSceneIdList(taskId uint64) (*GetSceneIdListRes, error) {
 	var reply GetSceneIdListRes
 	err := p.httpClient.Get(
-		fmt.Sprintf("/openapi/train_task/%s/scene_id_list", strconv.Itoa(int(taskId))), map[string]string{},
+		fmt.Sprintf("/openapi/train_task/%d/scene_id_list", taskId), map[string]string{},
 		&reply,
 	)
 	if err != nil {
