@@ -489,3 +489,42 @@ func (s *Simulator) SetNMVPosition(simId string, nmvId string, point *Point, phi
 	}
 	return &reply, nil
 }
+
+func (s *Simulator) GetStepSpawnIdList() (*GetStepSpawnIdListRes, error) {
+	var reply GetStepSpawnIdListRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/step_spawn_ids/get",
+		&GetStepSpawnIdListReq{SimulationId: s.simulationId},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetParticipantBaseInfo(participantIdList []string) (*GetParticipantBaseInfoRes, error) {
+	var reply GetParticipantBaseInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/base_info/get",
+		&GetParticipantBaseInfoReq{SimulationId: s.simulationId, ParticipantIdList: participantIdList},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetParticipantMovingInfo(participantIdList []string) (*GetParticipantMovingInfoRes, error) {
+	var reply GetParticipantMovingInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/moving_info/get",
+		&GetParticipantMovingInfoReq{SimulationId: s.simulationId, ParticipantIdList: participantIdList},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}

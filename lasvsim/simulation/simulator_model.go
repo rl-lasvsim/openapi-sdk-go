@@ -392,6 +392,39 @@ type SetNMVPositionReq struct {
 }
 type SetNMVPositionRes struct{}
 
+type GetStepSpawnIdListReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+}
+
+type GetStepSpawnIdListRes struct {
+	IdList []string `json:"id_list"`
+}
+
+type GetParticipantBaseInfoReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 参与者ID列表 - 最多支持100个ID
+	ParticipantIdList []string `json:"participant_id_list"`
+}
+
+type GetParticipantBaseInfoRes struct {
+	// 参与者基础信息
+	BaseInfoDict map[string]*ObjBaseInfo `json:"base_info_dict"`
+}
+
+type GetParticipantMovingInfoReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 参与者ID列表 - 最多支持100个ID
+	ParticipantIdList []string `json:"participant_id_list"`
+}
+
+type GetParticipantMovingInfoRes struct {
+	// 参与者移动信息
+	MovingInfoDict map[string]*ObjMovingInfo `json:"moving_info_dict"`
+}
+
 // NOTE: ---车辆接口的细节结构---
 type ObjBaseInfo struct {
 	// 宽(m)
