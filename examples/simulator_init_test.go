@@ -130,5 +130,10 @@ func TestSimulatorInit(t *testing.T) {
 			t.Fatal(err)
 		}
 		t.Log(*GetParticipantMovingInfoRes.MovingInfoDict["环境车辆1"])
+		GetParticipantPositionRes, err := simulator.GetParticipantPosition(GetStepSpawnIdListRes.IdList)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Log(*GetParticipantPositionRes.PositionDict["环境车辆1"])
 	}
 }

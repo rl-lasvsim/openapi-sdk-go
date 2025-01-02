@@ -341,7 +341,7 @@ type GetPedIdListRes struct {
 type GetPedBaseInfoReq struct {
 	// 仿真ID
 	SimulationId string `json:"simulation_id"`
-	// 行人ID列表 - 最多支持100个ID
+	// 行人ID列表 - 最多支持1000个ID
 	PedIdList []string `json:"ped_id_list"`
 }
 type GetPedBaseInfoRes struct {
@@ -372,7 +372,7 @@ type GetNMVIdListRes struct {
 type GetNMVBaseInfoReq struct {
 	// 仿真ID
 	SimulationId string `json:"simulation_id"`
-	// 非机动车ID列表 - 最多支持100个ID
+	// 非机动车ID列表 - 最多支持1000个ID
 	NmvIdList []string `json:"nmv_id_list"`
 }
 type GetNMVBaseInfoRes struct {
@@ -404,7 +404,7 @@ type GetStepSpawnIdListRes struct {
 type GetParticipantBaseInfoReq struct {
 	// 仿真ID
 	SimulationId string `json:"simulation_id"`
-	// 参与者ID列表 - 最多支持100个ID
+	// 参与者ID列表 - 最多支持1000个ID
 	ParticipantIdList []string `json:"participant_id_list"`
 }
 
@@ -416,13 +416,25 @@ type GetParticipantBaseInfoRes struct {
 type GetParticipantMovingInfoReq struct {
 	// 仿真ID
 	SimulationId string `json:"simulation_id"`
-	// 参与者ID列表 - 最多支持100个ID
+	// 参与者ID列表 - 最多支持1000个ID
 	ParticipantIdList []string `json:"participant_id_list"`
 }
 
 type GetParticipantMovingInfoRes struct {
 	// 参与者移动信息
 	MovingInfoDict map[string]*ObjMovingInfo `json:"moving_info_dict"`
+}
+
+type GetParticipantPositionReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 参与者ID列表 - 最多支持1000个ID
+	ParticipantIdList []string `json:"participant_id_list"`
+}
+
+type GetParticipantPositionRes struct {
+	// 参与者位置信息
+	PositionDict map[string]*Position `json:"position_dict"`
 }
 
 // NOTE: ---车辆接口的细节结构---
