@@ -15,15 +15,30 @@ type StopReq struct {
 	SimulationId string `json:"simulation_id"`
 }
 
-type StopRes struct {
-}
+type StopRes struct{}
 
 type StepReq struct {
 	SimulationID string `json:"simulation_id"`
 }
 
 type StepRes struct {
-	// Define fields according to the expected response structure
+	// 0:运行中;1001:正常结束;1002;未通过
+	Code    StepCode `json:"code"`
+	Message string   `json:"message"`
+}
+
+type StepCode int32
+
+func (s StepCode) IsRuning() bool {
+	return s >= 0 && s <= 100
+}
+
+func (s StepCode) IsStoped() bool {
+	return s == 1001
+}
+
+func (s StepCode) IsUnpassed() bool {
+	return s == 1002
 }
 
 type ResetReq struct {
@@ -31,9 +46,7 @@ type ResetReq struct {
 	ResetTrafficFlow bool   `json:"reset_traffic_flow"`
 }
 
-type ResetRes struct {
-	// Define fields according to the expected response structure
-}
+type ResetRes struct{}
 
 type GetCurrentStageReq struct {
 	// 仿真ID
