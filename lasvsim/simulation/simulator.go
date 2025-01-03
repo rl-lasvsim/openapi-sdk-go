@@ -528,3 +528,16 @@ func (s *Simulator) GetParticipantMovingInfo(participantIdList []string) (*GetPa
 	}
 	return &reply, nil
 }
+
+func (s *Simulator) GetParticipantPosition(participantIdList []string) (*GetParticipantPositionRes, error) {
+	var reply GetParticipantPositionRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/position/get",
+		&GetParticipantPositionReq{SimulationId: s.simulationId, ParticipantIdList: participantIdList},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
