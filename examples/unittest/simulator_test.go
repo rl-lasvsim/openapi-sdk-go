@@ -569,3 +569,273 @@ func TestGetParticipantPosition(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, participantPositionRes, "participant position result should not be nil")
 }
+
+func TestGetVehicleMovingInfoWithInvalidID(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	// Test with invalid vehicle ID
+	invalidID := "invalid_vehicle_id"
+	vehMovingInfos, err := simulator.GetVehicleMovingInfo([]string{invalidID})
+	assert.NoError(t, err)
+	assert.Empty(t, vehMovingInfos.MovingInfoDict[invalidID], "should return empty info for invalid ID")
+}
+
+func TestGetVehicleMovingInfoWithEmptyList(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	// Test with empty vehicle ID list
+	vehMovingInfos, err := simulator.GetVehicleMovingInfo([]string{})
+	assert.NoError(t, err)
+	assert.Empty(t, vehMovingInfos.MovingInfoDict, "should return empty dict for empty list")
+}
+
+func TestSetVehicleMovingInfoWithBoundaryValues(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	res, err := simulator.GetVehicleIdList()
+	assert.NoError(t, err)
+	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
+
+	// Test boundary values
+	veryLargeValue := float64(1e10)
+	verySmallValue := float64(-1e10)
+	zeroValue := float64(0)
+
+	// Test with very large value
+	_, err = simulator.SetVehicleMovingInfo(res.List[0], &veryLargeValue, nil, nil, nil, nil, nil)
+	assert.NoError(t, err)
+
+	// Test with very small value
+	_, err = simulator.SetVehicleMovingInfo(res.List[0], &verySmallValue, nil, nil, nil, nil, nil)
+	assert.NoError(t, err)
+
+	// Test with zero value
+	_, err = simulator.SetVehicleMovingInfo(res.List[0], &zeroValue, nil, nil, nil, nil, nil)
+	assert.NoError(t, err)
+
+	// Verify the changes
+	vehMovingInfos, err := simulator.GetVehicleMovingInfo([]string{res.List[0]})
+	assert.NoError(t, err)
+	assert.NotNil(t, vehMovingInfos.MovingInfoDict[res.List[0]], "should return vehicle info after setting")
+}
+
+func TestSetVehiclePositionWithBoundaryValues(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	res, err := simulator.GetVehicleIdList()
+	assert.NoError(t, err)
+	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
+
+	// Test boundary values for position
+	tests := []struct {
+		name string
+		x    float64
+		y    float64
+		phi  float64
+	}{
+		{"MaxValues", 1e10, 1e10, 360.0},
+		{"MinValues", -1e10, -1e10, -360.0},
+		{"ZeroValues", 0, 0, 0},
+		{"NormalValues", 100, 100, 45},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			point := &simulation.Point{X: tt.x, Y: tt.y}
+			_, err := simulator.SetVehiclePosition(res.List[0], point, &tt.phi)
+			assert.NoError(t, err)
+
+			// Verify position was set
+			posRes, err := simulator.GetVehiclePosition([]string{res.List[0]})
+			assert.NoError(t, err)
+			assert.NotNil(t, posRes.PositionDict[res.List[0]], "should return position info after setting")
+		})
+	}
+}
+
+func TestSetVehicleControlInfoWithBoundaryValues(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	res, err := simulator.GetVehicleIdList()
+	assert.NoError(t, err)
+	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
+
+	// Test boundary values for control info
+	tests := []struct {
+		name     string
+		steWheel float64
+		lonAcc   float64
+	}{
+		{"MaxValues", 1e5, 1e5},
+		{"MinValues", -1e5, -1e5},
+		{"ZeroValues", 0, 0},
+		{"NormalValues", 0.5, 2.0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := simulator.SetVehicleControlInfo(res.List[0], &tt.steWheel, &tt.lonAcc)
+			assert.NoError(t, err)
+
+			// Verify control info was set
+			controlRes, err := simulator.GetVehicleControlInfo([]string{res.List[0]})
+			assert.NoError(t, err)
+			assert.NotNil(t, controlRes.ControlInfoDict[res.List[0]], "should return control info after setting")
+		})
+	}
+}
+
+func TestSimulatorStepSequence(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	// Test multiple consecutive steps
+	steps := 5
+	for i := 0; i < steps; i++ {
+		stepRes, err := simulator.Step()
+		assert.NoError(t, err)
+		assert.NotNil(t, stepRes, "step result should not be nil")
+	}
+}
+
+func TestResetAfterMultipleSteps(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	// Take multiple steps
+	for i := 0; i < 3; i++ {
+		_, err := simulator.Step()
+		assert.NoError(t, err)
+	}
+
+	// Get initial vehicle position
+	res, err := simulator.GetVehicleIdList()
+	assert.NoError(t, err)
+	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
+
+	_, err = simulator.GetVehiclePosition([]string{res.List[0]})
+	assert.NoError(t, err)
+
+	// Reset simulator
+	resetRes, err := simulator.Reset(true)
+	assert.NoError(t, err)
+	assert.NotNil(t, resetRes, "reset result should not be nil")
+
+	// Get position after reset
+	resetPos, err := simulator.GetVehiclePosition([]string{res.List[0]})
+	assert.NoError(t, err)
+
+	// Compare positions (they might be different due to traffic flow reset)
+	assert.NotNil(t, resetPos.PositionDict[res.List[0]], "should return position info after reset")
+}
+
+func TestPedPositionWithBoundaryValues(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	res, err := simulator.GetPedIdList()
+	if err != nil {
+		t.Skip("Skipping test: no pedestrians available")
+	}
+	if len(res.List) == 0 {
+		t.Skip("Skipping test: no pedestrians available")
+	}
+
+	// Test boundary values for pedestrian position
+	tests := []struct {
+		name string
+		x    float64
+		y    float64
+		phi  float64
+	}{
+		{"MaxValues", 1e10, 1e10, 360.0},
+		{"MinValues", -1e10, -1e10, -360.0},
+		{"ZeroValues", 0, 0, 0},
+		{"NormalValues", 100, 100, 45},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			point := &simulation.Point{X: tt.x, Y: tt.y}
+			_, err := simulator.SetPedPosition(res.List[0], point, &tt.phi)
+			assert.NoError(t, err)
+
+			// Get pedestrian base info to verify
+			baseInfo, err := simulator.GetPedBaseInfo([]string{res.List[0]})
+			assert.NoError(t, err)
+			assert.NotNil(t, baseInfo.BaseInfoDict[res.List[0]], "should return base info after setting position")
+		})
+	}
+}
+
+func TestNMVPositionWithBoundaryValues(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	res, err := simulator.GetNMVIdList()
+	if err != nil {
+		t.Skip("Skipping test: no NMVs available")
+	}
+	if len(res.List) == 0 {
+		t.Skip("Skipping test: no NMVs available")
+	}
+
+	// Test boundary values for NMV position
+	tests := []struct {
+		name string
+		x    float64
+		y    float64
+		phi  float64
+	}{
+		{"MaxValues", 1e10, 1e10, 360.0},
+		{"MinValues", -1e10, -1e10, -360.0},
+		{"ZeroValues", 0, 0, 0},
+		{"NormalValues", 100, 100, 45},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			point := &simulation.Point{X: tt.x, Y: tt.y}
+			_, err := simulator.SetNMVPosition(res.List[0], point, &tt.phi)
+			assert.NoError(t, err)
+
+			// Get NMV base info to verify
+			baseInfo, err := simulator.GetNMVBaseInfo([]string{res.List[0]})
+			assert.NoError(t, err)
+			assert.NotNil(t, baseInfo.BaseInfoDict[res.List[0]], "should return base info after setting position")
+		})
+	}
+}
+
+func TestParticipantInfoWithEmptyLists(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	// Test with empty lists
+	tests := []struct {
+		name string
+		fn   func([]string) (interface{}, error)
+	}{
+		{"BaseInfo", func(ids []string) (interface{}, error) {
+			return simulator.GetParticipantBaseInfo(ids)
+		}},
+		{"MovingInfo", func(ids []string) (interface{}, error) {
+			return simulator.GetParticipantMovingInfo(ids)
+		}},
+		{"Position", func(ids []string) (interface{}, error) {
+			return simulator.GetParticipantPosition(ids)
+		}},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := tt.fn([]string{})
+			assert.NoError(t, err, "should handle empty list without error")
+		})
+	}
+}
