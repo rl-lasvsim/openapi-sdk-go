@@ -18,13 +18,13 @@ import (
 */
 func TestCreateCosimTask(t *testing.T) {
 	var (
-		// "终端地址"的环境变量
+		// 接口地址
 		endpoint string = os.Getenv("QX_ENDPOINT") // 线上环境地址: https://qianxing-api.risenlighten.com
-		// "token"的环境变量
+		// 授权token
 		token string = os.Getenv("QX_TOKEN") // 登录仿真平台后访问https://qianxing.risenlighten.com/#/usecenter/personalCenter, 点击最下面按钮复制token
 
 		// 登录仿真平台, 选择想要进行联合仿真的任务及剧本，赋值给下面的taskId和recordId变量
-		// 任务ID
+		// 仿真任务ID
 		taskId uint64 = 9988
 		// 剧本ID
 		recordId uint64 = 20776
