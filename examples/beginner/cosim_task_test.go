@@ -8,6 +8,7 @@ import (
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/httpclient"
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim/simulation"
+	"github.com/stretchr/testify/assert"
 )
 
 /*
@@ -32,15 +33,13 @@ func TestCreateCosimTask(t *testing.T) {
 
 	// 1. 初始化客户端
 	var cli = lasvsim.NewClient(&httpclient.HttpConfig{
-		Endpoint: endpoint, // 设置的"终端地址"环境变量
-		Token:    token,    // 设置的"token"环境变量
+		Endpoint: endpoint, // 接口地址
+		Token:    token,    // 授权token
 	})
 
 	// 2. 拷贝剧本, 返回的结构中NewRecordId字段就是新创建的剧本ID, 仿真结束后可到该剧本下查看结果详情
 	newRecord, err := cli.ProcessTask.CopyRecord(taskId, recordId)
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
 
 	// 3. 通过拷贝的场景Id、Version和SimRecordId初始化仿真器
 	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{
@@ -48,18 +47,14 @@ func TestCreateCosimTask(t *testing.T) {
 		ScenVer:     newRecord.ScenVer,
 		SimRecordID: newRecord.SimRecordId,
 	})
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
 
 	// 关闭仿真器, 释放服务器资源
 	defer simulator.Stop()
 
 	// 获取测试车辆列表
 	testVehicleList, err := simulator.GetTestVehicleIdList()
-	if err != nil {
-		panic(err)
-	}
+	assert.NoError(t, err)
 
 	// 使测试车辆环形行驶
 	for i := 0; i < 50; i++ {
@@ -68,9 +63,8 @@ func TestCreateCosimTask(t *testing.T) {
 		var lonAcc float64 = 0.05
 		// 设置车辆的控制信息
 		_, err := simulator.SetVehicleControlInfo(testVehicleList.List[0], &steWheel, &lonAcc)
-		if err != nil {
-			panic(err)
-		}
+		assert.NoError(t, err)
+
 		// 执行仿真器步骤
 		simulator.Step()
 	}
