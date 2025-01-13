@@ -12,11 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupSimulator(t *testing.T) *simulation.Simulator {
+func setupClient() *lasvsim.Client {
 	cli := lasvsim.NewClient(&httpclient.HttpConfig{
 		Token:    os.Getenv("QX_TOKEN"),
 		Endpoint: os.Getenv("QX_ENDPOINT"),
 	})
+
+	return cli
+}
+
+func setupSimulator(t *testing.T) *simulation.Simulator {
+	cli := setupClient()
 
 	taskId, err := strconv.ParseUint(os.Getenv("QX_TASK_ID"), 10, 64)
 	assert.NoError(t, err)
@@ -34,13 +40,24 @@ func setupSimulator(t *testing.T) *simulation.Simulator {
 	return simulator
 }
 
+func getSimTaskScen(t *testing.T, cli *lasvsim.Client) (string, string) {
+	taskId, err := strconv.ParseUint(os.Getenv("QX_TASK_ID"), 10, 64)
+	assert.NoError(t, err)
+	recordId, err := strconv.ParseUint(os.Getenv("QX_RECORD_ID"), 10, 64)
+	assert.NoError(t, err)
+	res, err := cli.ProcessTask.GetRecordScenario(taskId, recordId)
+	assert.NoError(t, err)
+
+	return res.ScenId, res.ScenVer
+}
+
 func TestSimulatorInitialization(t *testing.T) {
 	// Test normal initialization
 	simulator := setupSimulator(t)
 	assert.NotNil(t, simulator, "simulator should be initialized")
 	defer simulator.Stop()
 
-	_, err := strconv.ParseUint(os.Getenv("QX_TASK_ID"), 10, 64)
+	_, err := strconv.ParseUint(os.Getenv("QX_TASK_ID_NOT"), 10, 64)
 	assert.Error(t, err, "should return error for invalid task ID")
 }
 
@@ -124,19 +141,36 @@ func TestSimulatorReset(t *testing.T) {
 func TestGetCurrentStage(t *testing.T) {
 	simulator := setupSimulator(t)
 	defer simulator.Stop()
+	cli := setupClient()
+	scenId, scenVer := getSimTaskScen(t, cli)
+	hdMap, err := cli.Resources.GetHdMap(scenId, scenVer)
+	assert.NoError(t, err)
+	assert.NotNil(t, hdMap, "hd map should not be nil")
+	assert.Greater(t, len(hdMap.Data.Junctions), 0, "not found junction")
 
 	// Test getting current stage
-	stageRes, err := simulator.GetCurrentStage("simId", "junctionId")
-	assert.NoError(t, err)
+	stageRes, err := simulator.GetCurrentStage(hdMap.Data.Junctions[0].Id)
+	if err != nil {
+		return
+	}
 	assert.NotNil(t, stageRes, "current stage result should not be nil")
 }
 
 func TestGetMovementSignal(t *testing.T) {
 	simulator := setupSimulator(t)
 	defer simulator.Stop()
+	cli := setupClient()
+	scenId, scenVer := getSimTaskScen(t, cli)
+	hdMap, err := cli.Resources.GetHdMap(scenId, scenVer)
+	assert.NoError(t, err)
+	assert.NotNil(t, hdMap, "hd map should not be nil")
+	assert.Greater(t, len(hdMap.Data.Junctions), 0, "not found junction")
+	if len(hdMap.Data.Junctions[0].Movements) == 0 {
+		return
+	}
 
 	// Test getting movement signal
-	signalRes, err := simulator.GetMovementSignal("simId", "movementId")
+	signalRes, err := simulator.GetMovementSignal(hdMap.Data.Junctions[0].Movements[0].Id)
 	assert.NoError(t, err)
 	assert.NotNil(t, signalRes, "movement signal result should not be nil")
 }
@@ -144,19 +178,34 @@ func TestGetMovementSignal(t *testing.T) {
 func TestGetSignalPlan(t *testing.T) {
 	simulator := setupSimulator(t)
 	defer simulator.Stop()
+	cli := setupClient()
+
+	scenId, scenVer := getSimTaskScen(t, cli)
+	hdMap, err := cli.Resources.GetHdMap(scenId, scenVer)
+	assert.NoError(t, err)
+	assert.NotNil(t, hdMap, "hd map should not be nil")
+	assert.Greater(t, len(hdMap.Data.Junctions), 0, "not found junction")
 
 	// Test getting signal plan
-	signalPlanRes, err := simulator.GetSignalPlan("simId", "junctionId")
-	assert.NoError(t, err)
+	signalPlanRes, err := simulator.GetSignalPlan(hdMap.Data.Junctions[0].Id)
+	if err != nil {
+		return
+	}
 	assert.NotNil(t, signalPlanRes, "signal plan result should not be nil")
 }
 
 func TestGetMovementList(t *testing.T) {
 	simulator := setupSimulator(t)
 	defer simulator.Stop()
+	cli := setupClient()
+	scenId, scenVer := getSimTaskScen(t, cli)
+	hdMap, err := cli.Resources.GetHdMap(scenId, scenVer)
+	assert.NoError(t, err)
+	assert.NotNil(t, hdMap, "hd map should not be nil")
+	assert.Greater(t, len(hdMap.Data.Junctions), 0, "not found junction")
 
 	// Test getting movement list
-	movementListRes, err := simulator.GetMovementList("simId", "junctionId")
+	movementListRes, err := simulator.GetMovementList(hdMap.Data.Junctions[0].Id)
 	assert.NoError(t, err)
 	assert.NotNil(t, movementListRes, "movement list result should not be nil")
 }
@@ -306,7 +355,9 @@ func TestSetVehiclePlanningInfo(t *testing.T) {
 	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
 
 	// Test setting vehicle planning info
-	planningInfoRes, err := simulator.SetVehiclePlanningInfo(res.List[0], []*simulation.Point{})
+	planningInfoRes, err := simulator.SetVehiclePlanningInfo(res.List[0], []*simulation.Point{
+		{X: 0.0, Y: 0.0},
+	})
 	assert.NoError(t, err)
 	assert.NotNil(t, planningInfoRes, "set vehicle planning info result should not be nil")
 }
@@ -351,7 +402,14 @@ func TestSetVehicleBaseInfo(t *testing.T) {
 	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
 
 	// Test setting vehicle base info
-	baseInfoRes, err := simulator.SetVehicleBaseInfo(res.List[0], &simulation.ObjBaseInfo{}, &simulation.DynamicInfo{})
+	baseInfoRes, err := simulator.SetVehicleBaseInfo(res.List[0], &simulation.ObjBaseInfo{
+		Width:  1.0,
+		Length: 1.0,
+		Height: 1.0,
+	}, &simulation.DynamicInfo{
+		FrontWheelStiffness: 1.0,
+		FrontAxleToCenter:   1.0,
+	})
 	assert.NoError(t, err)
 	assert.NotNil(t, baseInfoRes, "set vehicle base info result should not be nil")
 }
@@ -365,8 +423,14 @@ func TestSetVehicleDestination(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
 
+	positions, err := simulator.GetVehiclePosition([]string{res.List[0]})
+	assert.NoError(t, err)
+	positon := positions.PositionDict[res.List[0]]
 	// Test setting vehicle destination
-	destinationRes, err := simulator.SetVehicleDestination(res.List[0], &simulation.Point{})
+	destinationRes, err := simulator.SetVehicleDestination(res.List[0], &simulation.Point{
+		X: positon.Point.X + 1,
+		Y: positon.Point.Y,
+	})
 	assert.NoError(t, err)
 	if destinationRes == nil {
 		t.Skip("destination is nil, skipping test")
@@ -388,7 +452,7 @@ func TestGetPedBaseInfo(t *testing.T) {
 	defer simulator.Stop()
 
 	// Test getting pedestrian base info
-	pedBaseInfoRes, err := simulator.GetPedBaseInfo("simId", []string{"pedId"})
+	pedBaseInfoRes, err := simulator.GetPedBaseInfo([]string{"pedId"})
 	assert.NoError(t, err)
 	assert.NotNil(t, pedBaseInfoRes, "pedestrian base info result should not be nil")
 }
@@ -423,7 +487,7 @@ func TestGetNMVBaseInfo(t *testing.T) {
 	defer simulator.Stop()
 
 	// Test getting non-motorized vehicle base info
-	nmvBaseInfoRes, err := simulator.GetNMVBaseInfo("simId", []string{"nmvId"})
+	nmvBaseInfoRes, err := simulator.GetNMVBaseInfo([]string{"nmvId"})
 	assert.NoError(t, err)
 	assert.NotNil(t, nmvBaseInfoRes, "non-motorized vehicle base info result should not be nil")
 }
@@ -438,7 +502,7 @@ func TestSetNMVPosition(t *testing.T) {
 	if nmvIdListRes == nil || len(nmvIdListRes.List) == 0 {
 		return
 	}
-	nmvPositionRes, err := simulator.SetNMVPosition("simId", nmvIdListRes.List[0], &simulation.Point{}, utils.Ptr(1.0))
+	nmvPositionRes, err := simulator.SetNMVPosition(nmvIdListRes.List[0], &simulation.Point{}, utils.Ptr(1.0))
 	assert.NoError(t, err)
 	assert.NotNil(t, nmvPositionRes, "set non-motorized vehicle position result should not be nil")
 }
