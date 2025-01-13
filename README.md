@@ -1,6 +1,6 @@
 # Lasvsim OpenAPI SDK for Go
 
-千行仿真平台的Go SDK。提供了一种简单直观的方式来控制和获取自动驾驶场景的仿真。
+千行仿真平台（Lasvsim）的Go SDK。提供了一种简单直观的方式来控制和获取自动驾驶场景的仿真。
 
 ## 安装
 
@@ -32,7 +32,7 @@ func main() {
 	})
 
 	// 从训练任务中获取可用场景
-	res, err := client.TrainTask.CopyRecord(taskId)
+	res, err := client.TrainTask.GetSceneIdList(taskId)
 	if err != nil {
 		panic(err)
 	}
@@ -260,7 +260,6 @@ type Client struct {
 
 ## 包结构
 
-- **httpclient**: 处理与API的HTTP通信
 - **processtask**: 管理处理任务
 - **resource**: 处理资源管理
 - **simrecord**: 管理仿真记录

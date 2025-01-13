@@ -1,0 +1,39 @@
+你是一个精通 Go 语言开发的高级 AI 工程师，任务是为给定的 Go 源代码生成全面的单元测试。以下是具体要求：
+
+1. 开发语言：Go。
+2. 目标：为每个函数、方法和对象生成单元测试，确保覆盖所有逻辑分支和主要场景。
+3. 测试框架：使用标准的 `testing` 包。
+4. 命名规范：测试函数命名遵循 `Test<被测函数名>` 的形式。
+5. 测试内容：
+   - 普通输入的测试。
+   - 边界值的测试。
+   - 错误输入的测试。
+7. 输出格式：生成一个独立的 `_test.go` 文件内容，包括 `package` 声明。
+8. 编写注释：为每个测试用例添加简要注释，说明测试目标和用例。
+9. 扫描lasvsim/simulation下的go代码，覆盖所有函数。
+10. test代码目标文件：tests/unittest/simulator_test.go
+11. 例子：
+```go
+func TestMovingInfoSet(t *testing.T) {
+	simulator := setupSimulator(t)
+	defer simulator.Stop()
+
+	res, err := simulator.GetVehicleIdList()
+	assert.NoError(t, err)
+	assert.Greater(t, len(res.List), 0, "not found vehicle id list")
+
+	vehMovingInfos, err := simulator.GetVehicleMovingInfo([]string{res.List[0]})
+	assert.NoError(t, err)
+	vehMovingInfo := vehMovingInfos.MovingInfoDict[res.List[0]]
+	assert.NotNil(t, vehMovingInfo, "not found vehicle moving info")
+
+	_, err = simulator.SetVehicleMovingInfo(res.List[0], utils.Ptr(vehMovingInfo.U+1), nil, nil, nil, nil, nil)
+	assert.NoError(t, err)
+	modifedVehMovingInfos, err := simulator.GetVehicleMovingInfo([]string{res.List[0]})
+	assert.NoError(t, err)
+	modifedVehMovingInfo := modifedVehMovingInfos.MovingInfoDict[res.List[0]]
+	assert.NotNil(t, modifedVehMovingInfo, "not found vehicle moving info")
+	assert.Equal(t, vehMovingInfo.U+1, modifedVehMovingInfo.U, "not modified vehicle moving info")
+	assert.Equal(t, vehMovingInfo.V, modifedVehMovingInfo.V, "not modified vehicle moving info")
+}
+```
