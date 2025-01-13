@@ -1,0 +1,79 @@
+# Go 到 Python 代码转换，一定只修改变动部分，不需要全部修改。
+
+## 目标
+
+将 `openapi-sdk-go/lasvsim` 目录中的 Go 代码翻译成 `openapi-sdk-python/lasvsim_openapi` 目录中的 Python 代码，确保功能对等并遵循指定的编码风格。
+使用git diff进行差异分析，上次提交的commit是“b17b7f25a1d329c43030d302432cd73f226f797d”
+
+## 输入
+
+*   **Go 代码：** `openapi-sdk-go/lasvsim` 目录下的所有 `.go` 文件。
+*   **Python 代码风格参考：** `openapi-sdk-python/lasvsim_openapi` 目录下的所有 `.py` 文件。这是主要的风格指南。
+*   **包导入风格：** 使用绝对导入，例如 `from lasvsim_openapi.resources import Resources`（`lasvsim_openapi` 是项目名称，应保持一致）。
+
+## 输出
+
+*   **翻译后的 Python 代码：** 所有翻译后的代码应放在 `openapi-sdk-python/lasvsim_openapi` 目录中（与风格参考目录相同）。
+
+## 翻译要求
+
+*   **功能对等：** Python 代码必须与原始 Go 代码功能完全一致。需要进行彻底的测试以验证。
+*   **风格一致性：** Python 代码必须尽可能严格地遵循参考 Python 代码的风格。
+*   **Pythonic 惯用法：** 尽可能使用 Pythonic 惯用法，但不得损害功能对等或风格一致性。
+*   **显式属性定义：** Python 类应使用 `dataclass` 装饰器，并使用类型提示和默认值显式定义属性。Go 中可为 `nil` 的字段（Python 中为 `None`）应使用 `typing.Optional`。Go 中指针类型字段在 Python 中默认是 `None`。使用前向引用 (例如 `Optional["OtherClass"]`) 处理循环依赖。
+
+    示例：
+
+    ```python
+    from dataclasses import dataclass
+    from typing import Optional
+
+    @dataclass
+    class StepResult:
+        """Step result information."""
+        record_id: str = ""
+        obj_id: str = ""
+        timestamp: int = 0
+        result: Optional[Step] = None
+
+        def __init__(self, record_id: str = "", obj_id: str = "", timestamp: int = 0, result: Optional[Step] = None):
+            self.record_id = record_id
+            self.obj_id = obj_id
+            self.timestamp = timestamp
+            self.result = result
+
+        @classmethod
+        def from_dict(cls, data: dict = None):
+            if data is None:
+                return None
+            result = data.pop("result", None)
+            instance = cls(**data)
+            instance.result = None if result is None else Step.from_dict(result)
+            return instance
+    ```
+
+*   **“Req”类构造函数：** 以 “Req” 结尾的类应使用 `dataclass` 装饰器，并提供以下初始化方式：
+    1.  通过关键字参数直接初始化类属性（主构造器）。
+    2.  使用类方法 `from_dict(data: Optional[dict])` 从字典初始化。
+
+*   **错误处理：** *忽略* Go 的错误处理（`if err != nil`），除非它是原始被翻译的逻辑的一部分（例如，Go 中的 `panic` 应转换为 Python 异常）。
+*   **类型别名：** Go 中的类型别名应翻译为 Python 中的类型别名 (例如 `MyInt = int`)。
+*   **常量：** Go 常量翻译为 Python 常量（大写字母命名）。
+*   **枚举：** Go 的 `iota` 枚举翻译为 Python 的 `enum.Enum`。
+*   **文档字符串 (Docstrings):** 按照参考 Python 代码的风格，为类、方法、函数和模块添加文档字符串。
+
+## 翻译注意事项
+
+*   **类型转换：** 仔细管理 Go 和 Python 之间的数据类型差异。必要时使用显式类型转换。
+*   **并发：** 将 Go 的并发机制翻译为适当的 Python 并发机制（例如，`threading`、`asyncio`）。*清楚地记录*任何并发更改。
+*   **第三方库：** 确定并导入等效的 Python 库。记录这些依赖项。
+
+## 评估标准
+
+翻译后的代码将根据以下标准评估：
+
+*   **功能正确性：** Python 代码的行为是否与 Go 代码完全相同？
+*   **风格遵循：** Python 代码是否遵循提供的风格指南？
+*   **代码清晰度和可读性：** Python 代码的结构是否良好且易于理解？
+*   **完整性：** 是否翻译了所有 Go 文件？
+*   **Pythonic 惯用法：** 是否在适当情况下使用了 Pythonic 惯用法？
