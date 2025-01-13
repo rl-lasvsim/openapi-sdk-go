@@ -11,7 +11,7 @@
 7. 输出格式：生成一个独立的 `_test.go` 文件内容，包括 `package` 声明。
 8. 编写注释：为每个测试用例添加简要注释，说明测试目标和用例。
 9. 扫描lasvsim/simulation下的go代码，覆盖所有函数。
-10. test代码目标文件：examples/unittest/simulator_test.go
+10. test代码目标文件：tests/unittest/simulator_test.go
 11. 例子：
 ```go
 func TestMovingInfoSet(t *testing.T) {
