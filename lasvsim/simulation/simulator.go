@@ -113,7 +113,7 @@ func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
 }
 
 // --------- 地图部分 ---------
-func (s *Simulator) GetCurrentStage(simId string, junctionId string) (*GetCurrentStageRes, error) {
+func (s *Simulator) GetCurrentStage(junctionId string) (*GetCurrentStageRes, error) {
 	var reply GetCurrentStageRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/traffic_light/current_stage/get",
@@ -125,7 +125,7 @@ func (s *Simulator) GetCurrentStage(simId string, junctionId string) (*GetCurren
 	}
 	return &reply, nil
 }
-func (s *Simulator) GetMovementSignal(simId string, movementId string) (*GetMovementSignalRes, error) {
+func (s *Simulator) GetMovementSignal(movementId string) (*GetMovementSignalRes, error) {
 	var reply GetMovementSignalRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/traffic_light/phase_info/get",
@@ -137,7 +137,7 @@ func (s *Simulator) GetMovementSignal(simId string, movementId string) (*GetMove
 	}
 	return &reply, nil
 }
-func (s *Simulator) GetSignalPlan(simId string, junctionId string) (*GetSignalPlanRes, error) {
+func (s *Simulator) GetSignalPlan(junctionId string) (*GetSignalPlanRes, error) {
 	var reply GetSignalPlanRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/traffic_light/signal_plan/get",
@@ -149,7 +149,7 @@ func (s *Simulator) GetSignalPlan(simId string, junctionId string) (*GetSignalPl
 	}
 	return &reply, nil
 }
-func (s *Simulator) GetMovementList(simId string, junctionId string) (*GetMovementListRes, error) {
+func (s *Simulator) GetMovementList(junctionId string) (*GetMovementListRes, error) {
 	var reply GetMovementListRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/movement/list/get",
@@ -424,7 +424,7 @@ func (s *Simulator) GetPedIdList() (*GetPedIdListRes, error) {
 	return &reply, nil
 }
 
-func (s *Simulator) GetPedBaseInfo(simId string, pedIdList []string) (*GetPedBaseInfoRes, error) {
+func (s *Simulator) GetPedBaseInfo(pedIdList []string) (*GetPedBaseInfoRes, error) {
 	var reply GetPedBaseInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/ped/base_info/get",
@@ -464,7 +464,7 @@ func (s *Simulator) GetNMVIdList() (*GetNMVIdListRes, error) {
 	return &reply, nil
 }
 
-func (s *Simulator) GetNMVBaseInfo(simId string, nmvIdList []string) (*GetNMVBaseInfoRes, error) {
+func (s *Simulator) GetNMVBaseInfo(nmvIdList []string) (*GetNMVBaseInfoRes, error) {
 	var reply GetNMVBaseInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/nmv/base_info/get",
@@ -477,7 +477,7 @@ func (s *Simulator) GetNMVBaseInfo(simId string, nmvIdList []string) (*GetNMVBas
 	return &reply, nil
 }
 
-func (s *Simulator) SetNMVPosition(simId string, nmvId string, point *Point, phi *float64) (*SetNMVPositionRes, error) {
+func (s *Simulator) SetNMVPosition(nmvId string, point *Point, phi *float64) (*SetNMVPositionRes, error) {
 	var reply SetNMVPositionRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/nmv/position/set",

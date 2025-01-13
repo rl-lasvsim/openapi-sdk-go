@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 
 	"github.com/rl-lasvsim/openapi-sdk-go/lasvsim"
@@ -10,10 +11,8 @@ import (
 
 func TestSimulatorInit(t *testing.T) {
 	cli := lasvsim.NewClient(&httpclient.HttpConfig{
-		// Endpoint: os.Getenv("QX_ENDPOINT"),
-		// Token:    os.Getenv("QX_TOKEN"),
-		Endpoint: "http://8.146.201.197:30080/dev",
-		Token:    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjE4LCJvaWQiOjI2LCJuYW1lIjoi5piH5ZCv56eR5oqAIiwiaWRlbnRpdHkiOiJhZG1pbiIsInBlcm1pc3Npb25zIjpbXSwiaXNzIjoidXNlciIsInN1YiI6Ikxhc1ZTaW0iLCJleHAiOjE3MzYyMzI0MjYsIm5iZiI6MTczNTYyNzYyNiwiaWF0IjoxNzM1NjI3NjI2LCJqdGkiOiIxOCJ9.oaLpNDfC3-e-75mPyDQ-mFjPbFpy2wf0VKdPIrVfT5E",
+		Endpoint: os.Getenv("QX_ENDPOINT"),
+		Token:    os.Getenv("QX_TOKEN"),
 	})
 
 	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{

@@ -92,13 +92,18 @@ func (m *ManualControl) runInteractive() {
 			}
 			switch ev.Rune() {
 			case 'w':
-				// m.simulator.SetVehicleControlInfo()
+				m.simulator.SetVehicleControlInfo(m.controledVehicle, nil, &m.lonAccPerPress)
 				printStr(s, 0, 1, defStyle, "Moving Down (s)")
 			case 's':
+				lonAcc := -m.lonAccPerPress
+				m.simulator.SetVehicleControlInfo(m.controledVehicle, nil, &(lonAcc))
 				printStr(s, 0, 1, defStyle, "Moving Down (s)")
 			case 'a':
+				steWheel := -m.steWheelPerPress
+				m.simulator.SetVehicleControlInfo(m.controledVehicle, &(steWheel), nil)
 				printStr(s, 0, 1, defStyle, "Moving Left (a)")
 			case 'd':
+				m.simulator.SetVehicleControlInfo(m.controledVehicle, &m.steWheelPerPress, nil)
 				printStr(s, 0, 1, defStyle, "Moving Right (d)")
 			default:
 				printStr(s, 0, 1, defStyle, "Invalid input.")
