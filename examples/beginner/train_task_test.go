@@ -44,6 +44,11 @@ func TestCreateTrainTask(t *testing.T) {
 	})
 	assert.NoError(t, err)
 
+	for i := 0; i < 100; i++ {
+		_, err := simulator.Step()
+		assert.NoError(t, err)
+	}
+
 	// 关闭仿真器, 释放服务器资源
 	_ = simulator.Stop()
 }

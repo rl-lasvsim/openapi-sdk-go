@@ -1,10 +1,10 @@
 # Lasvsim OpenAPI SDK for Go
 
-千行仿真平台（Lasvsim）的Go SDK。提供了一种简单直观的方式来控制和获取自动驾驶场景的仿真。
+千行仿真平台（Lasvsim）的 Go SDK。提供了一种简单直观的方式来控制和获取自动驾驶场景的仿真。
 
 ## 安装
 
-您可以直接使用go get安装该软件包：
+您可以直接使用 go get 安装该软件包：
 
 ```bash
 go get github.com/rl-lasvsim/openapi-sdk-go/lasvsim
@@ -12,7 +12,7 @@ go get github.com/rl-lasvsim/openapi-sdk-go/lasvsim
 
 ## 快速开始
 
-以下是SDK使用的简单示例：
+以下是 SDK 使用的简单示例：
 
 ```go
 package main
@@ -25,55 +25,79 @@ import (
 )
 
 func main() {
-	// 初始化客户端
-	client := lasvsim.NewClient(&httpclient.HttpConfig{
-		Token:    "your_token_here",
-		Endpoint: "your_endpoint_here",
+	var (
+		// 接口地址
+		endpoint string = os.Getenv("QX_ENDPOINT") // 线上环境地址: https://qianxing-api.risenlighten.com
+		// 授权token
+		token string = os.Getenv("QX_TOKEN") // 登录仿真平台后访问https://qianxing.risenlighten.com/#/usecenter/personalCenter, 点击最下面按钮复制token
+
+		// 登录仿真平台, 选择想要进行联合仿真的任务及剧本，赋值给下面的taskId和recordId变量
+		// 仿真任务ID
+		taskId uint64 = 0
+		// 剧本ID
+		recordId uint64 = 0
+	)
+
+	// 1. 初始化客户端
+	var cli = lasvsim.NewClient(&httpclient.HttpConfig{
+		Endpoint: endpoint, // 接口地址
+		Token:    token,    // 授权token
 	})
 
-	// 从训练任务中获取可用场景
-	res, err := client.TrainTask.GetSceneIdList(taskId)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("可用场景: %v\n", res)
+	// 2. 拷贝剧本, 返回的结构中NewRecordId字段就是新创建的剧本ID, 仿真结束后可到该剧本下查看结果详情
+	newRecord, err := cli.ProcessTask.CopyRecord(taskId, recordId)
+	if err!=nil{
+    panic(err)
+  }
+  fmt.Println("拷贝剧本成功")
 
-	// 创建仿真器实例
-	simulator, err := client.InitSimulatorFromConfig(simulation.SimulatorConfig{
-		ScenID:      res.SceneIdList[0],
-		ScenVer:     res.SceneVersionList[0],
+	// 3. 通过拷贝的场景Id、Version和SimRecordId初始化仿真器
+	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{
+		ScenID:      newRecord.ScenId,
+		ScenVer:     newRecord.ScenVer,
+		SimRecordID: newRecord.SimRecordId,
 	})
-	if err != nil {
-		panic(err)
-	}
+	if err!=nil{
+    panic(err)
+  }
+  fmt.Println("初始化仿真器成功")
 
-	// 运行仿真步骤
-	for i := 0; i < 10; i++ {
+	// 关闭仿真器, 释放服务器资源
+	defer simulator.Stop()
+
+	// 获取测试车辆列表
+	testVehicleList, err := simulator.GetTestVehicleIdList()
+	if err!=nil{
+    panic(err)
+  }
+  fmt.Println("测试车辆ID列表:", testVehicleList)
+
+	// 使测试车辆环形行驶
+	for i := 0; i < 50; i++ {
+		// 设置方向盘转角30度, 纵向加速度5
+		var steWheel float64 = 10
+		var lonAcc float64 = 0.05
+		// 设置车辆的控制信息
+		_, err := simulator.SetVehicleControlInfo(testVehicleList.List[0], &steWheel, &lonAcc)
+		if err!=nil{
+      panic(err)
+    }
+
+		// 执行仿真器步骤
 		stepRes, err := simulator.Step()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("第 %d 步结果: %v\n", i, stepRes)
-
-		// 获取车辆信息
-		vehicleIds, err := simulator.GetVehicleIdList()
-		if err != nil {
-			panic(err)
-		}
-		fmt.Printf("车辆ID列表: %v\n", vehicleIds)
-
-		// 控制车辆运动
-		_, err = simulator.SetVehicleControlInfo("test_vehicle_1", 1.2, 1.1)
-		if err != nil {
-			panic(err)
-		}
+		if err!=nil{
+      panic(err)
+    }
+    fmt.Println("第 %d 步结果: %v\n", i, stepRes)
 	}
 
-	// 停止仿真
-	err = simulator.Stop()
-	if err != nil {
-		panic(err)
-	}
+	// 可在此处继续调用其他接口, 查看联合仿真文档: https://www.risenlighten.com/#/union
+
+	// 仿真结束后, 到千行仿真平台对应的taskId/recordId下查看联合仿真结果详情
+	fmt.Printf("https://qianxing.risenlighten.com/#/configuration/circleTask?id=%d\n", taskId)
+
+	// 如想直接查看本次联合仿真的回放视频, 可访问下面网址：
+	fmt.Printf("https://qianxing.risenlighten.com/#/sampleRoad/cartest/?id=%d&record_id=%d&sim_record_id=%s\n", taskId, newRecord.NewRecordId, newRecord.SimRecordId)
 }
 ```
 
@@ -96,7 +120,7 @@ type Client struct {
 #### 方法
 
 - `NewClient(config *httpclient.HttpConfig) *Client`
-  使用给定配置创建新的API客户端。
+  使用给定配置创建新的 API 客户端。
 
 - `InitSimulatorFromConfig(simConfig simulation.SimulatorConfig) (*simulation.Simulator, error)`
   从给定配置初始化仿真器。
@@ -107,18 +131,21 @@ type Client struct {
 ### 子模块
 
 #### TrainTask
+
 管理训练任务。
 
 - `CopyRecord(taskId uint64) (*GetSceneIdListRes, error)`
   复制训练任务记录
 
 #### Resources
+
 处理资源管理。
 
 - `GetHdMap(scenId, scenVer string) (*GetHdMapRes, error)`
   获取高清地图
 
 #### ProcessTask
+
 管理处理任务。
 
 - `CopyRecord(taskId uint64, recordId uint64) (*CopyRecordRes, error)`
@@ -128,9 +155,10 @@ type Client struct {
   获取记录场景
 
 - `GetTaskRecordIds(taskId uint64) (*GetTaskRecordIdsRes, error)`
-  获取任务记录ID列表
+  获取任务记录 ID 列表
 
 #### Simulator
+
 提供仿真功能。
 
 - `Step() (*StepRes, error)`
@@ -155,10 +183,10 @@ type Client struct {
   获取移动列表
 
 - `GetVehicleIdList() (*GetVehicleIdListRes, error)`
-  获取车辆ID列表
+  获取车辆 ID 列表
 
 - `GetTestVehicleIdList() (*GetTestVehicleIdListRes, error)`
-  获取测试车辆ID列表
+  获取测试车辆 ID 列表
 
 - `GetVehicleBaseInfo(vehicleIdList []string) (*GetVehicleBaseInfoRes, error)`
   获取车辆基本信息
@@ -212,7 +240,7 @@ type Client struct {
   设置车辆目的地
 
 - `GetPedIdList() (*GetPedIdListRes, error)`
-  获取行人ID列表
+  获取行人 ID 列表
 
 - `GetPedBaseInfo(pedIdList []string) (*GetPedBaseInfoRes, error)`
   获取行人基本信息
@@ -221,7 +249,7 @@ type Client struct {
   设置行人位置
 
 - `GetNMVIdList() (*GetNMVIdListRes, error)`
-  获取非机动车ID列表
+  获取非机动车 ID 列表
 
 - `GetNMVBaseInfo(nmvIdList []string) (*GetNMVBaseInfoRes, error)`
   获取非机动车基本信息
@@ -230,10 +258,11 @@ type Client struct {
   设置非机动车位置
 
 #### SimRecord
+
 管理仿真记录。
 
 - `GetRecordIds(scenId string, scenVer string) (*GetRecordIdsRes, error)`
-  获取记录ID列表
+  获取记录 ID 列表
 
 - `GetTrackResults(id string, objId string) (*GetTrackResultsRes, error)`
   获取轨迹结果

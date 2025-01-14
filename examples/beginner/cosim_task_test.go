@@ -26,9 +26,9 @@ func TestCreateCosimTask(t *testing.T) {
 
 		// 登录仿真平台, 选择想要进行联合仿真的任务及剧本，赋值给下面的taskId和recordId变量
 		// 仿真任务ID
-		taskId uint64 = 9988
+		taskId uint64 = 0
 		// 剧本ID
-		recordId uint64 = 20776
+		recordId uint64 = 0
 	)
 
 	// 1. 初始化客户端
@@ -66,7 +66,8 @@ func TestCreateCosimTask(t *testing.T) {
 		assert.NoError(t, err)
 
 		// 执行仿真器步骤
-		simulator.Step()
+		_, err = simulator.Step()
+		assert.NoError(t, err)
 	}
 
 	// 可在此处继续调用其他接口, 查看联合仿真文档: https://www.risenlighten.com/#/union
