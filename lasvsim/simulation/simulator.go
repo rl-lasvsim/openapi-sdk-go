@@ -12,7 +12,7 @@ type SimulatorConfig struct {
 
 type Simulator struct {
 	httpClient   *httpclient.HttpClient
-	simulationId string
+	SimulationId string
 }
 
 func NewSimulatorFromConfig(hCli *httpclient.HttpClient, cfg SimulatorConfig) (*Simulator, error) {
@@ -43,7 +43,6 @@ func NewSimulatorFromSim(hCli *httpclient.HttpClient, simId, simAddr string) (*S
 
 	return simtor, nil
 }
-
 func (s *Simulator) initFromConfig(simConfig SimulatorConfig) error {
 	var reply struct {
 		SimulationId   string `json:"simulation_id"`
@@ -69,7 +68,7 @@ func (s *Simulator) initFromConfig(simConfig SimulatorConfig) error {
 func (s *Simulator) initFromSim(simId, simAddr string) error {
 	s.httpClient.Headers["x-md-simulation_id"] = simId
 	s.httpClient.Headers["x-md-rl-direct-addr"] = simAddr
-	s.simulationId = simId
+	s.SimulationId = simId
 	return nil
 }
 
@@ -77,7 +76,7 @@ func (s *Simulator) Step() (*StepRes, error) {
 	var reply StepRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/step",
-		&StepReq{SimulationID: s.simulationId},
+		&StepReq{SimulationID: s.SimulationId},
 		&reply,
 	)
 	if err != nil {
@@ -90,7 +89,7 @@ func (s *Simulator) Stop() error {
 	var reply StopRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/stop",
-		&StopReq{SimulationId: s.simulationId},
+		&StopReq{SimulationId: s.SimulationId},
 		&reply,
 	)
 	if err != nil {
@@ -103,7 +102,7 @@ func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
 	var reply ResetRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/reset",
-		&ResetReq{SimulationID: s.simulationId, ResetTrafficFlow: resetTrafficFlow},
+		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow},
 		&reply,
 	)
 	if err != nil {
@@ -113,11 +112,11 @@ func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
 }
 
 // --------- 地图部分 ---------
-func (s *Simulator) GetCurrentStage(simId string, junctionId string) (*GetCurrentStageRes, error) {
+func (s *Simulator) GetCurrentStage(junctionId string) (*GetCurrentStageRes, error) {
 	var reply GetCurrentStageRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/traffic_light/current_stage/get",
-		&GetCurrentStageReq{SimulationId: s.simulationId, JunctionId: junctionId},
+		&GetCurrentStageReq{SimulationId: s.SimulationId, JunctionId: junctionId},
 		&reply,
 	)
 	if err != nil {
@@ -125,11 +124,11 @@ func (s *Simulator) GetCurrentStage(simId string, junctionId string) (*GetCurren
 	}
 	return &reply, nil
 }
-func (s *Simulator) GetMovementSignal(simId string, movementId string) (*GetMovementSignalRes, error) {
+func (s *Simulator) GetMovementSignal(movementId string) (*GetMovementSignalRes, error) {
 	var reply GetMovementSignalRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/traffic_light/phase_info/get",
-		&GetMovementSignalReq{SimulationId: s.simulationId, MovementId: movementId},
+		&GetMovementSignalReq{SimulationId: s.SimulationId, MovementId: movementId},
 		&reply,
 	)
 	if err != nil {
@@ -137,11 +136,11 @@ func (s *Simulator) GetMovementSignal(simId string, movementId string) (*GetMove
 	}
 	return &reply, nil
 }
-func (s *Simulator) GetSignalPlan(simId string, junctionId string) (*GetSignalPlanRes, error) {
+func (s *Simulator) GetSignalPlan(junctionId string) (*GetSignalPlanRes, error) {
 	var reply GetSignalPlanRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/traffic_light/signal_plan/get",
-		&GetSignalPlanReq{SimulationId: s.simulationId, JunctionId: junctionId},
+		&GetSignalPlanReq{SimulationId: s.SimulationId, JunctionId: junctionId},
 		&reply,
 	)
 	if err != nil {
@@ -149,11 +148,11 @@ func (s *Simulator) GetSignalPlan(simId string, junctionId string) (*GetSignalPl
 	}
 	return &reply, nil
 }
-func (s *Simulator) GetMovementList(simId string, junctionId string) (*GetMovementListRes, error) {
+func (s *Simulator) GetMovementList(junctionId string) (*GetMovementListRes, error) {
 	var reply GetMovementListRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/movement/list/get",
-		&GetMovementListReq{SimulationId: s.simulationId, JunctionId: junctionId},
+		&GetMovementListReq{SimulationId: s.SimulationId, JunctionId: junctionId},
 		&reply,
 	)
 	if err != nil {
@@ -167,7 +166,7 @@ func (s *Simulator) GetVehicleIdList() (*GetVehicleIdListRes, error) {
 	var reply GetVehicleIdListRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/id_list/get",
-		&GetVehicleIdListReq{SimulationId: s.simulationId},
+		&GetVehicleIdListReq{SimulationId: s.SimulationId},
 		&reply,
 	)
 	if err != nil {
@@ -180,7 +179,7 @@ func (s *Simulator) GetTestVehicleIdList() (*GetTestVehicleIdListRes, error) {
 	var reply GetTestVehicleIdListRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/test_vehicle/id_list/get",
-		&GetTestVehicleIdListReq{SimulationId: s.simulationId},
+		&GetTestVehicleIdListReq{SimulationId: s.SimulationId},
 		&reply,
 	)
 	if err != nil {
@@ -193,7 +192,7 @@ func (s *Simulator) GetVehicleBaseInfo(vehicleIdList []string) (*GetVehicleBaseI
 	var reply GetVehicleBaseInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/base_info/get",
-		&GetVehicleBaseInfoReq{SimulationId: s.simulationId, IdList: vehicleIdList},
+		&GetVehicleBaseInfoReq{SimulationId: s.SimulationId, IdList: vehicleIdList},
 		&reply,
 	)
 	if err != nil {
@@ -206,7 +205,7 @@ func (s *Simulator) GetVehiclePosition(vehicleIdList []string) (*GetVehiclePosit
 	var reply GetVehiclePositionRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/position/get",
-		&GetVehiclePositionReq{SimulationId: s.simulationId, IdList: vehicleIdList},
+		&GetVehiclePositionReq{SimulationId: s.SimulationId, IdList: vehicleIdList},
 		&reply,
 	)
 	if err != nil {
@@ -219,7 +218,7 @@ func (s *Simulator) GetVehicleMovingInfo(vehicleIdList []string) (*GetVehicleMov
 	var reply GetVehicleMovingInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/moving_info/get",
-		&GetVehicleMovingInfoReq{SimulationId: s.simulationId, IdList: vehicleIdList},
+		&GetVehicleMovingInfoReq{SimulationId: s.SimulationId, IdList: vehicleIdList},
 		&reply,
 	)
 	if err != nil {
@@ -232,7 +231,7 @@ func (s *Simulator) GetVehicleControlInfo(vehicleIdList []string) (*GetVehicleCo
 	var reply GetVehicleControlInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/control/get",
-		&GetVehicleControlInfoReq{SimulationId: s.simulationId, IdList: vehicleIdList},
+		&GetVehicleControlInfoReq{SimulationId: s.SimulationId, IdList: vehicleIdList},
 		&reply,
 	)
 	if err != nil {
@@ -245,7 +244,7 @@ func (s *Simulator) GetVehiclePerceptionInfo(vehicleId string) (*GetVehiclePerce
 	var reply GetVehiclePerceptionInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/perception/get",
-		&GetVehiclePerceptionInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId},
+		&GetVehiclePerceptionInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
@@ -258,7 +257,7 @@ func (s *Simulator) GetVehicleReferenceLines(vehicleId string) (*GetVehicleRefer
 	var reply GetVehicleReferenceLinesRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/reference_line/get",
-		&GetVehicleReferenceLinesReq{SimulationId: s.simulationId, VehicleId: vehicleId},
+		&GetVehicleReferenceLinesReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
@@ -271,7 +270,7 @@ func (s *Simulator) GetVehiclePlanningInfo(vehicleId string) (*GetVehiclePlannin
 	var reply GetVehiclePlanningInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/planning/get",
-		&GetVehiclePlanningInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId},
+		&GetVehiclePlanningInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
@@ -284,7 +283,7 @@ func (s *Simulator) GetVehicleNavigationInfo(vehicleId string) (*GetVehicleNavig
 	var reply GetVehicleNavigationInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/navigation/get",
-		&GetVehicleNavigationInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId},
+		&GetVehicleNavigationInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
@@ -297,7 +296,7 @@ func (s *Simulator) GetVehicleCollisionStatus(vehicleId string) (*GetVehicleColl
 	var reply GetVehicleCollisionStatusRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/collision/get",
-		&GetVehicleCollisionStatusReq{SimulationId: s.simulationId, VehicleId: vehicleId},
+		&GetVehicleCollisionStatusReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
@@ -310,7 +309,7 @@ func (s *Simulator) GetVehicleTargetSpeed(vehicleId string) (*GetVehicleTargetSp
 	var reply GetVehicleTargetSpeedRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/target_speed/get",
-		&GetVehicleTargetSpeedReq{SimulationId: s.simulationId, VehicleId: vehicleId},
+		&GetVehicleTargetSpeedReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
@@ -323,7 +322,7 @@ func (s *Simulator) SetVehiclePlanningInfo(vehicleId string, planningPath []*Poi
 	var reply SetVehiclePlanningInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/planning/set",
-		&SetVehiclePlanningInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId, PlanningPath: planningPath},
+		&SetVehiclePlanningInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, PlanningPath: planningPath},
 		&reply,
 	)
 	if err != nil {
@@ -336,7 +335,7 @@ func (s *Simulator) SetVehicleControlInfo(vehicleId string, steWheel *float64, l
 	var reply SetVehicleControlInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/control/set",
-		&SetVehicleControlInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId, SteWheel: steWheel, LonAcc: lonAcc},
+		&SetVehicleControlInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, SteWheel: steWheel, LonAcc: lonAcc},
 		&reply,
 	)
 	if err != nil {
@@ -349,7 +348,7 @@ func (s *Simulator) SetVehiclePosition(vehicleId string, point *Point, phi *floa
 	var reply SetVehiclePositionRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/position/set",
-		&SetVehiclePositionReq{SimulationId: s.simulationId, VehicleId: vehicleId, Point: point, Phi: phi},
+		&SetVehiclePositionReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Point: point, Phi: phi},
 		&reply,
 	)
 	if err != nil {
@@ -362,7 +361,7 @@ func (s *Simulator) SetVehicleMovingInfo(vehicleId string, u, v, w, uAcc, vAcc, 
 	var reply SetVehicleMovingInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/moving_info/set",
-		&SetVehicleMovingInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId, U: u, V: v, W: w, UAcc: uAcc, VAcc: vAcc, WAcc: wAcc},
+		&SetVehicleMovingInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, U: u, V: v, W: w, UAcc: uAcc, VAcc: vAcc, WAcc: wAcc},
 		&reply,
 	)
 	if err != nil {
@@ -375,7 +374,7 @@ func (s *Simulator) SetVehicleBaseInfo(vehicleId string, baseInfo *ObjBaseInfo, 
 	var reply SetVehicleBaseInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/base_info/set",
-		&SetVehicleBaseInfoReq{SimulationId: s.simulationId, VehicleId: vehicleId, BaseInfo: baseInfo, DynamicInfo: dynamicInfo},
+		&SetVehicleBaseInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, BaseInfo: baseInfo, DynamicInfo: dynamicInfo},
 		&reply,
 	)
 	if err != nil {
@@ -388,7 +387,7 @@ func (s *Simulator) SetVehicleLinkNav(vehicleId string, linkNav []string) (*SetV
 	var reply SetVehicleLinkNavRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/link_nav/set",
-		&SetVehicleLinkNavReq{SimulationId: s.simulationId, VehicleId: vehicleId, LinkNav: linkNav},
+		&SetVehicleLinkNavReq{SimulationId: s.SimulationId, VehicleId: vehicleId, LinkNav: linkNav},
 		&reply,
 	)
 	if err != nil {
@@ -401,7 +400,7 @@ func (s *Simulator) SetVehicleDestination(vehicleId string, destination *Point) 
 	var reply SetVehicleDestinationRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/destination/set",
-		&SetVehicleDestinationReq{SimulationId: s.simulationId, VehicleId: vehicleId, Destination: destination},
+		&SetVehicleDestinationReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Destination: destination},
 		&reply,
 	)
 	if err != nil {
@@ -415,7 +414,7 @@ func (s *Simulator) GetPedIdList() (*GetPedIdListRes, error) {
 	var reply GetPedIdListRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/ped/id_list/get",
-		&GetPedIdListReq{SimulationId: s.simulationId},
+		&GetPedIdListReq{SimulationId: s.SimulationId},
 		&reply,
 	)
 	if err != nil {
@@ -424,11 +423,11 @@ func (s *Simulator) GetPedIdList() (*GetPedIdListRes, error) {
 	return &reply, nil
 }
 
-func (s *Simulator) GetPedBaseInfo(simId string, pedIdList []string) (*GetPedBaseInfoRes, error) {
+func (s *Simulator) GetPedBaseInfo(pedIdList []string) (*GetPedBaseInfoRes, error) {
 	var reply GetPedBaseInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/ped/base_info/get",
-		&GetPedBaseInfoReq{SimulationId: s.simulationId, PedIdList: pedIdList},
+		&GetPedBaseInfoReq{SimulationId: s.SimulationId, PedIdList: pedIdList},
 		&reply,
 	)
 	if err != nil {
@@ -441,7 +440,7 @@ func (s *Simulator) SetPedPosition(pedId string, point *Point, phi *float64) (*S
 	var reply SetPedPositionRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/ped/position/set",
-		&SetPedPositionReq{SimulationId: s.simulationId, PedId: pedId, Point: point, Phi: phi},
+		&SetPedPositionReq{SimulationId: s.SimulationId, PedId: pedId, Point: point, Phi: phi},
 		&reply,
 	)
 	if err != nil {
@@ -455,7 +454,7 @@ func (s *Simulator) GetNMVIdList() (*GetNMVIdListRes, error) {
 	var reply GetNMVIdListRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/nmv/id_list/get",
-		&GetNMVIdListReq{SimulationId: s.simulationId},
+		&GetNMVIdListReq{SimulationId: s.SimulationId},
 		&reply,
 	)
 	if err != nil {
@@ -464,11 +463,11 @@ func (s *Simulator) GetNMVIdList() (*GetNMVIdListRes, error) {
 	return &reply, nil
 }
 
-func (s *Simulator) GetNMVBaseInfo(simId string, nmvIdList []string) (*GetNMVBaseInfoRes, error) {
+func (s *Simulator) GetNMVBaseInfo(nmvIdList []string) (*GetNMVBaseInfoRes, error) {
 	var reply GetNMVBaseInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/nmv/base_info/get",
-		&GetNMVBaseInfoReq{SimulationId: s.simulationId, NmvIdList: nmvIdList},
+		&GetNMVBaseInfoReq{SimulationId: s.SimulationId, NmvIdList: nmvIdList},
 		&reply,
 	)
 	if err != nil {
@@ -477,11 +476,63 @@ func (s *Simulator) GetNMVBaseInfo(simId string, nmvIdList []string) (*GetNMVBas
 	return &reply, nil
 }
 
-func (s *Simulator) SetNMVPosition(simId string, nmvId string, point *Point, phi *float64) (*SetNMVPositionRes, error) {
+func (s *Simulator) SetNMVPosition(nmvId string, point *Point, phi *float64) (*SetNMVPositionRes, error) {
 	var reply SetNMVPositionRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/nmv/position/set",
-		&SetNMVPositionReq{SimulationId: s.simulationId, NmvId: nmvId, Point: point, Phi: phi},
+		&SetNMVPositionReq{SimulationId: s.SimulationId, NmvId: nmvId, Point: point, Phi: phi},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetStepSpawnIdList() (*GetStepSpawnIdListRes, error) {
+	var reply GetStepSpawnIdListRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/step_spawn_ids/get",
+		&GetStepSpawnIdListReq{SimulationId: s.SimulationId},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetParticipantBaseInfo(participantIdList []string) (*GetParticipantBaseInfoRes, error) {
+	var reply GetParticipantBaseInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/base_info/get",
+		&GetParticipantBaseInfoReq{SimulationId: s.SimulationId, ParticipantIdList: participantIdList},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetParticipantMovingInfo(participantIdList []string) (*GetParticipantMovingInfoRes, error) {
+	var reply GetParticipantMovingInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/moving_info/get",
+		&GetParticipantMovingInfoReq{SimulationId: s.SimulationId, ParticipantIdList: participantIdList},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetParticipantPosition(participantIdList []string) (*GetParticipantPositionRes, error) {
+	var reply GetParticipantPositionRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/participant/position/get",
+		&GetParticipantPositionReq{SimulationId: s.SimulationId, ParticipantIdList: participantIdList},
 		&reply,
 	)
 	if err != nil {
