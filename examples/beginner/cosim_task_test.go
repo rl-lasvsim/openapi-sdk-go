@@ -70,7 +70,7 @@ func TestCreateCosimTask(t *testing.T) {
 		assert.NoError(t, err)
 	}
 
-	// 可在此处继续调用其他接口, 查看联合仿真文档: https://www.risenlighten.com/#/union
+	// 可在此处继续调用其他接口, 查看联合仿真文档: https://doc.risenlighten.com/#/api-doc/overview
 
 	// 仿真结束后, 到千行仿真平台对应的taskId/recordId下查看联合仿真结果详情
 	fmt.Printf("https://qianxing.risenlighten.com/#/configuration/circleTask?id=%d\n", taskId)
