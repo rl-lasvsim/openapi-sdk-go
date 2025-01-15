@@ -450,6 +450,15 @@ type GetParticipantPositionRes struct {
 	PositionDict map[string]*Position `json:"position_dict"`
 }
 
+type GetVehicleSensorConfigReq struct {
+	SimulationId string `json:"simulation_id"`
+	VehicleId    string `json:"vehicle_id"`
+}
+
+type GetVehicleSensorConfigRes struct {
+	SensorsConfig []*SensorConfig `json:"sensors_config"`
+}
+
 // NOTE: ---车辆接口的细节结构---
 type ObjBaseInfo struct {
 	// 宽(m)
@@ -540,6 +549,66 @@ type NavigationInfo struct {
 	// LaneNav []*LaneNav `protobuf:"bytes,3,rep,name=lane_nav,json=laneNav,proto3" json:"lane_nav"`
 	// 终点
 	Destination *Position `protobuf:"bytes,4,opt,name=destination,proto3" json:"destination"`
+}
+
+type SensorConfig struct {
+	SensorId   string                  `json:"sensor_id"`
+	SensorType SensorConfig_SensorType `json:"sensor_type"`
+	// 检测范围角度（扇形圆心角）
+	DetectAngle float64 `json:"detect_angle"`
+	// 检测范围距离 （扇形半径）
+	DetectRange float64 `json:"detect_range"`
+	// 相对车辆质心纵向偏移
+	InstallX float64 `json:"install_x"`
+	// 相对车辆质心横向偏移
+	InstallY float64 `json:"install_y"`
+	// 安装位置与交通参与者朝向之间的夹角
+	InstallPhi float64 `json:"install_phi"`
+	// 传感器感知精度误差
+	SensorError *SensorErrorConfig `json:"sensor_error"`
+	// 相对车辆质心纵向偏移
+	InstallLon float64 `json:"install_lon"`
+	// 相对车辆质心横向偏移
+	InstallLat float64 `json:"install_lat"`
+}
+
+type SensorConfig_SensorType int32
+
+const (
+	SensorConfig_UNKNOWN SensorConfig_SensorType = 0
+	// 摄像头
+	SensorConfig_CAMERA SensorConfig_SensorType = 1
+	// 激光雷达
+	SensorConfig_LIDAR SensorConfig_SensorType = 2
+	// 毫米波雷达
+	SensorConfig_RADAR SensorConfig_SensorType = 3
+)
+
+// Enum value maps for SensorConfig_SensorType.
+var (
+	SensorConfig_SensorType_name = map[int32]string{
+		0: "UNKNOWN",
+		1: "CAMERA",
+		2: "LIDAR",
+		3: "RADAR",
+	}
+	SensorConfig_SensorType_value = map[string]int32{
+		"UNKNOWN": 0,
+		"CAMERA":  1,
+		"LIDAR":   2,
+		"RADAR":   3,
+	}
+)
+
+type SensorErrorConfig struct {
+	// 位置方差
+	LocationSigma float64 `json:"location_sigma"`
+	// 朝向角方差
+	PhiSigma float64 `json:"phi_sigma"`
+	// 尺寸方差
+	SizeSigma float64 `json:"size_sigma"`
+	// 速度方差
+	VelocitySigma float64 `json:"velocity_sigma"`
 }
 
 // ---------地图movement-------
