@@ -839,3 +839,59 @@ func TestParticipantInfoWithEmptyLists(t *testing.T) {
 		})
 	}
 }
+
+func TestGetVehicleSensorConfig(t *testing.T) {
+	cli := lasvsim.NewClient(&httpclient.HttpConfig{
+		Token:    os.Getenv("QX_TOKEN"),
+		Endpoint: os.Getenv("QX_ENDPOINT"),
+	})
+
+	taskId, err := strconv.ParseUint(os.Getenv("QX_TASK_ID"), 10, 64)
+	assert.NoError(t, err)
+	recordId, err := strconv.ParseUint(os.Getenv("QX_RECORD_ID"), 10, 64)
+	assert.NoError(t, err)
+
+	// Get scenario ID and version
+	scenRes, err := cli.ProcessTask.GetRecordScenario(taskId, recordId)
+	assert.NoError(t, err)
+
+	// Initialize simulator
+	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{
+		ScenID:  scenRes.ScenId,
+		ScenVer: scenRes.ScenVer,
+	})
+	assert.NoError(t, err)
+
+	// Get vehicle list
+	vehRes, err := simulator.GetTestVehicleIdList()
+	assert.NoError(t, err)
+	assert.Greater(t, len(vehRes.List), 0, "vehicle list should not be empty")
+
+	// Get sensor config for the first vehicle
+	sensorRes, err := simulator.GetVehicleSensorConfig(vehRes.List[0])
+	assert.NoError(t, err)
+	assert.NotNil(t, sensorRes, "sensor config response should not be nil")
+
+	// Validate sensor config data
+	if len(sensorRes.SensorsConfig) > 0 {
+		sensor := sensorRes.SensorsConfig[0]
+		// 验证传感器基本信息
+		assert.NotZero(t, sensor.SensorType, "sensor type should not be zero")
+
+		// 验证传感器安装位置
+		assert.NotZero(t, sensor.DetectRange, "detect range should not be zero")
+		assert.NotZero(t, sensor.DetectAngle, "detect angle should not be zero")
+
+		// 验证传感器误差配置
+		if sensor.SensorError != nil {
+			assert.GreaterOrEqual(t, sensor.SensorError.LocationSigma, float64(0), "location sigma should be non-negative")
+			assert.GreaterOrEqual(t, sensor.SensorError.PhiSigma, float64(0), "phi sigma should be non-negative")
+			assert.GreaterOrEqual(t, sensor.SensorError.SizeSigma, float64(0), "size sigma should be non-negative")
+			assert.GreaterOrEqual(t, sensor.SensorError.VelocitySigma, float64(0), "velocity sigma should be non-negative")
+		}
+	}
+
+	// Test with invalid vehicle ID
+	_, err = simulator.GetVehicleSensorConfig("")
+	assert.Error(t, err, "should return error for empty vehicle ID")
+}

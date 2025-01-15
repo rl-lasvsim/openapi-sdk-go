@@ -1,0 +1,30 @@
+go代码有改动，请使用git diff和main分支对比改动并同步到python代码。
+* 提示：simulator相关结构定义更新到simulator_model.py，以此类推
+* 示例：
+
+    ```python
+    from dataclasses import dataclass
+    from typing import Optional
+
+    @dataclass
+    class StepResult:
+        """Step result information."""
+        record_id: str = ""
+        obj_id: str = ""
+        timestamp: int = 0
+        result: Optional[Step] = None
+
+        def __init__(self, record_id: str = "", obj_id: str = "", timestamp: int = 0, result: Optional[Step] = None):
+            self.record_id = record_id
+            self.obj_id = obj_id
+            self.timestamp = timestamp
+            self.result = result
+
+        @classmethod
+        def from_dict(cls, data: dict = None):
+            if data is None:
+                return None
+            result = data.pop("result", None)
+            instance = cls(**data)
+            instance.result = None if result is None else Step.from_dict(result)
+            return instance
