@@ -540,3 +540,16 @@ func (s *Simulator) GetParticipantPosition(participantIdList []string) (*GetPart
 	}
 	return &reply, nil
 }
+
+func (s *Simulator) GetVehicleSensorConfig(vehicleId string) (*GetVehicleSensorConfigRes, error) {
+	var reply GetVehicleSensorConfigRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/sensor_config/get",
+		&GetVehicleSensorConfigReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
