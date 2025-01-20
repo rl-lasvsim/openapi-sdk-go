@@ -357,7 +357,7 @@ func TestSetVehiclePlanningInfo(t *testing.T) {
 	// Test setting vehicle planning info
 	planningInfoRes, err := simulator.SetVehiclePlanningInfo(res.List[0], []*simulation.Point{
 		{X: 0.0, Y: 0.0},
-	})
+	}, nil)
 	assert.NoError(t, err)
 	assert.NotNil(t, planningInfoRes, "set vehicle planning info result should not be nil")
 }
