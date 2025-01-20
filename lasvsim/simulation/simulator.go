@@ -318,11 +318,11 @@ func (s *Simulator) GetVehicleTargetSpeed(vehicleId string) (*GetVehicleTargetSp
 	return &reply, nil
 }
 
-func (s *Simulator) SetVehiclePlanningInfo(vehicleId string, planningPath []*Point) (*SetVehiclePlanningInfoRes, error) {
+func (s *Simulator) SetVehiclePlanningInfo(vehicleId string, planningPath []*Point, speed []float64) (*SetVehiclePlanningInfoRes, error) {
 	var reply SetVehiclePlanningInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/planning/set",
-		&SetVehiclePlanningInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, PlanningPath: planningPath},
+		&SetVehiclePlanningInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, PlanningPath: planningPath, Speed: speed},
 		&reply,
 	)
 	if err != nil {

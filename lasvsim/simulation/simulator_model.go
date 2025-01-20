@@ -244,6 +244,8 @@ type SetVehiclePlanningInfoReq struct {
 	VehicleId string `json:"vehicle_id"`
 	// 轨迹点
 	PlanningPath []*Point `json:"planning_path"`
+	// 轨迹点速度
+	Speed []float64 `json:"speed"`
 }
 type SetVehiclePlanningInfoRes struct{}
 
