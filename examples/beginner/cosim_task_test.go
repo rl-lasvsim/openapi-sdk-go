@@ -56,8 +56,11 @@ func TestCreateCosimTask(t *testing.T) {
 	testVehicleList, err := simulator.GetTestVehicleIdList()
 	assert.NoError(t, err)
 
+	// 记录仿真器运行状态(true: 运行中; false: 运行结束), 任务运行过程中持续更新该状态
+	var isRunning = true
+
 	// 使测试车辆环形行驶
-	for i := 0; i < 50; i++ {
+	for isRunning {
 		// 设置方向盘转角30度, 纵向加速度5
 		var steWheel float64 = 10
 		var lonAcc float64 = 0.05
@@ -65,9 +68,11 @@ func TestCreateCosimTask(t *testing.T) {
 		_, err := simulator.SetVehicleControlInfo(testVehicleList.List[0], &steWheel, &lonAcc)
 		assert.NoError(t, err)
 
-		// 执行仿真器步骤
-		_, err = simulator.Step()
+		// 执行仿真器步骤, 返回的结果中记录了当前任务的运行状态
+		stepRes, err := simulator.Step()
 		assert.NoError(t, err)
+
+		isRunning = stepRes.Code.IsRuning()
 	}
 
 	// 可在此处继续调用其他接口, 查看联合仿真文档: https://doc.risenlighten.com/#/api-doc/overview
