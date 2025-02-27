@@ -524,6 +524,11 @@ type ObjBaseInfo struct {
 	Length float64 `json:"length"`
 	// 重量(kg)
 	Weight float64 `json:"weight"`
+
+	MaxDec float64 `json:"max_dec"`
+	MaxAcc float64 `json:"max_acc"`
+	// m/s单位
+	MaxSpeed float64 `json:"max_speed"`
 }
 
 type DynamicInfo struct {
@@ -549,7 +554,50 @@ type Position struct {
 	DisToLaneEnd *float64 `json:"dis_to_lane_end"`
 	// 1 - 地图外 TODO 还有哪些选项
 	PositionType int32 `json:"position_type"`
+
+	Type Position_PositionType `json:"type"`
+	// 朝向
+	Heading *float64 `json:"heading"`
+	// 横滚角
+	Roll *float64 `json:"roll"`
+	// 俯仰角
+	Patch *float64 `json:"patch"`
+	// 车道编号
+	LaneIndex *int32 `json:"lane_index"`
+	// 车道偏移
+	LaneOffset *float64 `json:"lane_offset"`
+	// s值
+	S *float64 `json:"s"`
+	// t值
+	T *float64 `json:"t"`
 }
+
+type Position_PositionType int32
+
+const (
+	Position_POSITION_TYPE_UNKNOWN Position_PositionType = 0
+	// 1. 在车道内
+	Position_POSITION_TYPE_IN_LANE Position_PositionType = 1
+	// 2. 在路口内
+	Position_POSITION_TYPE_IN_JUNCTION Position_PositionType = 2
+	// 3. 在道路外
+	Position_POSITION_TYPE_OUT_ROAD Position_PositionType = 3
+)
+
+var (
+	Position_PositionType_name = map[int32]string{
+		0: "POSITION_TYPE_UNKNOWN",
+		1: "POSITION_TYPE_IN_LANE",
+		2: "POSITION_TYPE_IN_JUNCTION",
+		3: "POSITION_TYPE_OUT_ROAD",
+	}
+	Position_PositionType_value = map[string]int32{
+		"POSITION_TYPE_UNKNOWN":     0,
+		"POSITION_TYPE_IN_LANE":     1,
+		"POSITION_TYPE_IN_JUNCTION": 2,
+		"POSITION_TYPE_OUT_ROAD":    3,
+	}
+)
 
 type Point struct {
 	X float64 `json:"x"`
@@ -569,6 +617,8 @@ type ObjMovingInfo struct {
 	W float64 `protobuf:"fixed64,6,opt,name=w,proto3" json:"w"`
 	// 角加速度[m/s^2]
 	WAcc float64 `protobuf:"fixed64,7,opt,name=w_acc,json=wAcc,proto3" json:"w_acc"`
+
+	Heading float64 `protobuf:"fixed64,1,opt,name=heading,proto3" json:"heading"` // 行驶方向(单位: 弧度)
 }
 
 type ControlInfo struct {

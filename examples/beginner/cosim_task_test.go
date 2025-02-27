@@ -83,3 +83,69 @@ func TestCreateCosimTask(t *testing.T) {
 	// 如想直接查看本次联合仿真的回放视频, 可访问下面网址：
 	fmt.Printf("https://qianxing.risenlighten.com/#/sampleRoad/cartest/?id=%d&record_id=%d&sim_record_id=%s\n", taskId, newRecord.NewRecordId, newRecord.SimRecordId)
 }
+
+func TestCreateCosimTask1(t *testing.T) {
+	var (
+		endpoint string = "http://8.146.201.197:30080/dev/"
+		token    string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOjQ5LCJvaWQiOjI2LCJuYW1lIjoi5ZGo5YWr5Y-q6IO955yL5Zy65pmv5ZWK5ZWKIiwiaWRlbnRpdHkiOiJub3JtYWwiLCJwZXJtaXNzaW9ucyI6W10sImlzcyI6InVzZXIiLCJzdWIiOiJMYXNWU2ltIiwiZXhwIjoxNzQxMTU2NjY1LCJuYmYiOjE3NDA1NTE4NjUsImlhdCI6MTc0MDU1MTg2NSwianRpIjoiNDkifQ.iiRYKoj-fUdG-nkX5Vr_GXL3EDHLs8O0_WK_YO0dk5c"
+		taskId   uint64 = 14716
+		recordId uint64 = 18436
+	)
+
+	// 1. 初始化客户端
+	var cli = lasvsim.NewClient(&httpclient.HttpConfig{
+		Endpoint: endpoint, // 接口地址
+		Token:    token,    // 授权token
+	})
+
+	// 2. 拷贝剧本, 返回的结构中NewRecordId字段就是新创建的剧本ID, 仿真结束后可到该剧本下查看结果详情
+	newRecord, err := cli.ProcessTask.CopyRecord(taskId, recordId)
+	assert.NoError(t, err)
+
+	// 3. 通过拷贝的场景Id、Version和SimRecordId初始化仿真器
+	simulator, err := cli.InitSimulatorFromConfig(simulation.SimulatorConfig{
+		ScenID:      newRecord.ScenId,
+		ScenVer:     newRecord.ScenVer,
+		SimRecordID: newRecord.SimRecordId,
+	})
+	assert.NoError(t, err)
+
+	// 关闭仿真器, 释放服务器资源
+	defer simulator.Stop()
+
+	// 获取测试车辆列表
+	testVehicleList, err := simulator.GetTestVehicleIdList()
+	assert.NoError(t, err)
+
+	// 记录仿真器运行状态(true: 运行中; false: 运行结束), 任务运行过程中持续更新该状态
+	var isRunning = true
+
+	// _, err = simulator.SetVehicleExtraMetrics(testVehicleList.List[0], map[string]float64{"xlk": 1.0})
+	// assert.NoError(t, err)
+
+	// _, err = simulator.SetVehicleRoadPerceptionInfo(testVehicleList.List[0], &simulation.LocalMap{TrafficLightColors: map[string]int32{"1": 2}})
+	// assert.NoError(t, err)
+
+	_, err = simulator.SetVehicleObstaclePerceptionInfo(testVehicleList.List[0], []*simulation.Obstacle{{Id: "xlk"}})
+	assert.NoError(t, err)
+
+	// _, err = simulator.SetVehicleLocalPaths(testVehicleList.List[0], []*simulation.LocalPath{{Points: []*simulation.Point{{X: 1}}}}, nil)
+	// assert.NoError(t, err)
+
+	// 使测试车辆环形行驶
+	for isRunning {
+		// // 设置方向盘转角30度, 纵向加速度5
+		// var steWheel float64 = 10
+		// var lonAcc float64 = 0.05
+		// // 设置车辆的控制信息
+		// _, err := simulator.SetVehicleControlInfo(testVehicleList.List[0], &steWheel, &lonAcc)
+		// assert.NoError(t, err)
+
+		// 执行仿真器步骤, 返回的结果中记录了当前任务的运行状态
+		stepRes, err := simulator.Step()
+		assert.NoError(t, err)
+
+		isRunning = stepRes.Code.IsRuning()
+	}
+	fmt.Println("success")
+}
