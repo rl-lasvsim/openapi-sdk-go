@@ -461,6 +461,59 @@ type GetVehicleSensorConfigRes struct {
 	SensorsConfig []*SensorConfig `json:"sensors_config"`
 }
 
+// 设置车辆道路感知信息
+type SetVehicleRoadPerceptionInfoReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 车辆ID
+	VehicleId string `json:"vehicle_id"`
+	// 感知地图信息
+	Noa *LocalMap `json:"noa"`
+}
+
+type SetVehicleRoadPerceptionInfoRes struct{}
+
+// 设置车辆障碍物感知信息
+type SetVehicleObstaclePerceptionInfoReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 车辆ID
+	VehicleId string `json:"vehicle_id"`
+	// 障碍物信息
+	Obstacles []*Obstacle `json:"obstacles"`
+}
+
+type SetVehicleObstaclePerceptionInfoRes struct{}
+
+// 设置车辆指标
+type SetVehicleExtraMetricsReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 车辆ID
+	VehicleId string `json:"vehicle_id"`
+	// 额外指标
+	Metrics map[string]float64 `json:"metrics"`
+}
+
+type SetVehicleExtraMetricsRes struct{}
+
+type SetVehicleLocalPathsReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 车辆ID
+	VehicleId string `json:"vehicle_id"`
+	// 本地路径
+	LocalPaths []*LocalPath `json:"local_paths"`
+	// 选择的路径 - 不填默认选择概率最高的
+	ChooseIdx *int32 `json:"choose_idx"`
+}
+type LocalPath struct {
+	Points []*Point `json:"points"`
+	Prob   float64  `json:"prob"`
+}
+
+type SetVehicleLocalPathsRes struct{}
+
 // NOTE: ---车辆接口的细节结构---
 type ObjBaseInfo struct {
 	// 宽(m)
@@ -612,6 +665,73 @@ type SensorErrorConfig struct {
 	// 速度方差
 	VelocitySigma float64 `json:"velocity_sigma"`
 }
+
+type LocalMap struct {
+	// 车道边界线感知
+	LaneBoundaries []*LaneBoundary `protobuf:"bytes,1,rep,name=lane_boundaries,json=laneBoundaries,proto3" json:"lane_boundaries"`
+	// 路口感知
+	Junctions []*Polygon `protobuf:"bytes,2,rep,name=junctions,proto3" json:"junctions"`
+	// 人行横道感知
+	Crosswalks []*Polygon `protobuf:"bytes,3,rep,name=crosswalks,proto3" json:"crosswalks"`
+	// 红绿灯感知 <movement_id, TrafficLight> 0(无) | 1(红) | 2(黄) | 3(绿)
+	TrafficLightColors map[string]int32 `protobuf:"bytes,4,rep,name=traffic_light_colors,json=trafficLightColors,proto3" json:"traffic_light_colors" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
+	// 停车线
+	StopLines []*Polygon `protobuf:"bytes,5,rep,name=stop_lines,json=stopLines,proto3" json:"stop_lines"`
+	// 感知车道中心线
+	LaneCenterLines []*LineString `protobuf:"bytes,6,rep,name=lane_center_lines,json=laneCenterLines,proto3" json:"lane_center_lines"`
+	// 虚拟区域
+	VirtualPolygons []*Polygon `protobuf:"bytes,7,rep,name=virtual_polygons,json=virtualPolygons,proto3" json:"virtual_polygons"`
+}
+
+type LaneBoundary struct {
+	// 线型
+	Line *LineString `json:"line"`
+	// 线段类型, 实线 | 虚线
+	Style string `json:"style"`
+}
+
+// 线段
+type LineString struct {
+	Points []*Point `json:"points"`
+}
+
+// 多边形
+type Polygon struct {
+	Points []*Point `json:"points"`
+}
+
+// 障碍物结构
+type Obstacle struct {
+	Id         string           `json:"id"`
+	Type       Obstacle_ObjType `json:"type"`
+	BaseInfo   *ObjBaseInfo     `json:"base_info"`
+	MovingInfo *ObjMovingInfo   `json:"moving_info"`
+	Position   *Position        `json:"position"`
+}
+type Obstacle_ObjType int32
+
+const (
+	// 机动车
+	Obstacle_TYPE_VEHICLE Obstacle_ObjType = 0
+	// 行人
+	Obstacle_TYPE_PEDESTRIAN Obstacle_ObjType = 1
+	// 非机动车
+	Obstacle_TYPE_NMV Obstacle_ObjType = 2
+)
+
+// Enum value maps for Obstacle_ObjType.
+var (
+	Obstacle_ObjType_name = map[int32]string{
+		0: "TYPE_VEHICLE",
+		1: "TYPE_PEDESTRIAN",
+		2: "TYPE_NMV",
+	}
+	Obstacle_ObjType_value = map[string]int32{
+		"TYPE_VEHICLE":    0,
+		"TYPE_PEDESTRIAN": 1,
+		"TYPE_NMV":        2,
+	}
+)
 
 // ---------地图movement-------
 type Movement struct {

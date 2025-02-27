@@ -566,3 +566,55 @@ func (s *Simulator) GetVehicleSensorConfig(vehicleId string) (*GetVehicleSensorC
 	}
 	return &reply, nil
 }
+
+func (s *Simulator) SetVehicleRoadPerceptionInfo(vehicleId string, noa *LocalMap) (*SetVehicleRoadPerceptionInfoRes, error) {
+	var reply SetVehicleRoadPerceptionInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/road_perception/set",
+		&SetVehicleRoadPerceptionInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Noa: noa},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleObstaclePerceptionInfo(vehicleId string, obstacles []*Obstacle) (*SetVehicleObstaclePerceptionInfoRes, error) {
+	var reply SetVehicleObstaclePerceptionInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/obstacle_perception/set",
+		&SetVehicleObstaclePerceptionInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Obstacles: obstacles},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleExtraMetrics(vehicleId string, metrics map[string]float64) (*SetVehicleExtraMetricsRes, error) {
+	var reply SetVehicleExtraMetricsRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/extra_metrics/set",
+		&SetVehicleExtraMetricsReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Metrics: metrics},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleLocalPaths(vehicleId string, localPaths []*LocalPath, chooseIdx *int32) (*SetVehicleLocalPathsRes, error) {
+	var reply SetVehicleLocalPathsRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/local_paths/set",
+		&SetVehicleLocalPathsReq{SimulationId: s.SimulationId, VehicleId: vehicleId, LocalPaths: localPaths, ChooseIdx: chooseIdx},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
