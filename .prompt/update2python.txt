@@ -1,4 +1,4 @@
-go代码有改动，请使用git diff进行分支对比改动并同步到python代码，上次同步的commit是：508ba403e0bb307752d7e4e4fe533c83e6e8d8a7。
+go代码有改动，请使用git diff进行分支对比改动并同步到python代码，上次同步的commit是：4d17f1f68a82efdb6e028d7da01d858db70c1512。
 * 提示：simulator相关结构定义更新到simulator_model.py，以此类推
 * 示例：
 

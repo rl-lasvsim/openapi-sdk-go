@@ -68,6 +68,58 @@
 *   **并发：** 将 Go 的并发机制翻译为适当的 Python 并发机制（例如，`threading`、`asyncio`）。*清楚地记录*任何并发更改。
 *   **第三方库：** 确定并导入等效的 Python 库。记录这些依赖项。
 
+## 枚举翻译标准
+*   **翻译例子如下：**
+go枚举例子
+```go
+type Direction int32
+const (
+	Direction_DIRECTION_UNKNOWN Direction = 0
+	// 直行
+	Direction_DIRECTION_STRAIGHT Direction = 1
+	// 左转
+	Direction_DIRECTION_LEFT Direction = 2
+	// 右转
+	Direction_DIRECTION_RIGHT Direction = 3
+	// 掉头
+	Direction_DIRECTION_U_TURN Direction = 4
+)
+
+// Enum value maps for Direction.
+var (
+	Direction_name = map[int32]string{
+		0: "DIRECTION_UNKNOWN",
+		1: "DIRECTION_STRAIGHT",
+		2: "DIRECTION_LEFT",
+		3: "DIRECTION_RIGHT",
+		4: "DIRECTION_U_TURN",
+	}
+	Direction_value = map[string]int32{
+		"DIRECTION_UNKNOWN":  0,
+		"DIRECTION_STRAIGHT": 1,
+		"DIRECTION_LEFT":     2,
+		"DIRECTION_RIGHT":    3,
+		"DIRECTION_U_TURN":   4,
+	}
+)
+```
+python枚举翻译如下：
+```python
+from enum import Enum
+
+class Direction(Enum):
+    """方向枚举"""
+    # 未知方向
+    DIRECTION_UNKNOWN = 0
+    # 直行
+    DIRECTION_STRAIGHT = 1
+    # 左转
+    DIRECTION_LEFT = 2
+    # 右转
+    DIRECTION_RIGHT = 3
+    # 掉头
+    DIRECTION_U_TURN = 4
+```
 ## 评估标准
 
 翻译后的代码将根据以下标准评估：
