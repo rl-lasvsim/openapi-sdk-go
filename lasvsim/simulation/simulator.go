@@ -618,3 +618,16 @@ func (s *Simulator) SetVehicleLocalPaths(vehicleId string, localPaths []*LocalPa
 	}
 	return &reply, nil
 }
+
+func (s *Simulator) GetIdcVehicleNav(vehicleId string) (*GetIdcVehicleNavRes, error) {
+	var reply GetIdcVehicleNavRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/idc_vehicle_nav/get",
+		&SetVehicleLocalPathsReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}

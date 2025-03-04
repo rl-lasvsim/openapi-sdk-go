@@ -514,6 +514,26 @@ type LocalPath struct {
 
 type SetVehicleLocalPathsRes struct{}
 
+type GetIdcVehicleNavReq struct {
+	// 仿真ID
+	SimulationId string `json:"simulation_id"`
+	// 车辆ID
+	VehicleId string `json:"vehicle_id"`
+}
+
+type GetIdcVehicleNavRes struct {
+	// 子路段导航
+	LinkPathNav []string `json:"link_path_nav"`
+	// 子路段与路口拼接
+	LinkJunctionNav []string `json:"link_junction_nav"`
+	// 下一个路口
+	NextJunctionId string `json:"next_junction_id"`
+	// 距离下一个路口距离,路口内为0.0
+	DisToNextJunction float64 `json:"dis_to_next_junction"`
+	// 下一个movement
+	NextMovementId string `json:"next_movement_id"`
+}
+
 // NOTE: ---车辆接口的细节结构---
 type ObjBaseInfo struct {
 	// 宽(m)
