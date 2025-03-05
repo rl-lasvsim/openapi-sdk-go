@@ -161,19 +161,6 @@ func (s *Simulator) GetMovementList(junctionId string) (*GetMovementListRes, err
 	return &reply, nil
 }
 
-func (s *Simulator) NextStage(junctionId string) (*NextStageRes, error) {
-	var reply NextStageRes
-	err := s.httpClient.Post(
-		"/openapi/cosim/v2/simulation/map/movement/list/get",
-		&NextStageReq{SimulationId: s.SimulationId, JunctionId: junctionId},
-		&reply,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &reply, nil
-}
-
 // --------- 车辆部分 ---------
 func (s *Simulator) GetVehicleIdList() (*GetVehicleIdListRes, error) {
 	var reply GetVehicleIdListRes
