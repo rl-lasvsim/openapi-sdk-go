@@ -726,18 +726,42 @@ type LocalMap struct {
 	// 红绿灯感知 <movement_id, TrafficLight> 0(无) | 1(红) | 2(黄) | 3(绿)
 	TrafficLightColors map[string]int32 `protobuf:"bytes,4,rep,name=traffic_light_colors,json=trafficLightColors,proto3" json:"traffic_light_colors" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"varint,2,opt,name=value,proto3"`
 	// 停车线
-	StopLines []*Polygon `protobuf:"bytes,5,rep,name=stop_lines,json=stopLines,proto3" json:"stop_lines"`
+	StopLines []*StopLines `protobuf:"bytes,5,rep,name=stop_lines,json=stopLines,proto3" json:"stop_lines"`
 	// 感知车道中心线
-	LaneCenterLines []*LineString `protobuf:"bytes,6,rep,name=lane_center_lines,json=laneCenterLines,proto3" json:"lane_center_lines"`
+	LaneCenterLines []*LaneCenterLines `protobuf:"bytes,6,rep,name=lane_center_lines,json=laneCenterLines,proto3" json:"lane_center_lines"`
 	// 虚拟区域
 	VirtualPolygons []*Polygon `protobuf:"bytes,7,rep,name=virtual_polygons,json=virtualPolygons,proto3" json:"virtual_polygons"`
+	// 参考线
+	ReferenceLines []*ReferenceLines `protobuf:"bytes,8,rep,name=reference_lines,json=referenceLines,proto3" json:"reference_lines"`
 }
 
-type LaneBoundary struct {
-	// 线型
+type StopLines struct {
+	// 线段
 	Line *LineString `json:"line"`
-	// 线段类型, 实线 | 虚线
+	// 线段类型; "solid" : "实线" | "broken" : "虚线" | "marked": "散点标记"
 	Style string `json:"style"`
+	// 颜色; "yellow": "黄色" | "red": "红色" | "green": "绿色" | "blue" : "蓝色" | "purple" : "紫色" |"brown" : "棕色"
+	Color string `json:"color"`
+}
+
+// 感知车道中心线 bff结构
+type LaneCenterLines struct {
+	// 线段
+	Line *LineString `json:"line"`
+	// 线段类型; "solid" : "实线" | "broken" : "虚线" | "marked": "散点标记"
+	Style string `json:"style"`
+	// 颜色; "yellow": "黄色" | "red": "红色" | "green": "绿色" | "blue" : "蓝色" | "purple" : "紫色" |"brown" : "棕色"
+	Color string `json:"color"`
+}
+
+// 车道边界线感知
+type LaneBoundary struct {
+	// 线段
+	Line *LineString `json:"line"`
+	// 线段类型; "solid" : "实线" | "broken" : "虚线" | "marked": "散点标记"
+	Style string `json:"style"`
+	// 颜色; "yellow": "黄色" | "red": "红色" | "green": "绿色" | "blue" : "蓝色" | "purple" : "紫色" |"brown" : "棕色"
+	Color string `json:"color"`
 }
 
 // 线段
@@ -748,6 +772,19 @@ type LineString struct {
 // 多边形
 type Polygon struct {
 	Points []*Point `json:"points"`
+	// 线段类型; "solid" : "实线" | "broken" : "虚线" | "marked": "散点标记"
+	Style string `json:"style"`
+	// 颜色; "yellow": "黄色" | "red": "红色" | "green": "绿色" | "blue" : "蓝色" | "purple" : "紫色" |"brown" : "棕色"
+	Color string `json:"color"`
+}
+
+type ReferenceLines struct {
+	// 线段
+	Line *LineString `json:"line"`
+	// 线段类型; "solid" : "实线" | "broken" : "虚线" | "marked": "散点标记"
+	Style string `json:"style"`
+	// 颜色; "yellow": "黄色" | "red": "红色" | "green": "绿色" | "blue" : "蓝色" | "purple" : "紫色" |"brown" : "棕色"
+	Color string `json:"color"`
 }
 
 // 障碍物结构
