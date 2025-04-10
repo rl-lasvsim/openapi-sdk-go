@@ -98,11 +98,11 @@ func (s *Simulator) Stop() error {
 	return nil
 }
 
-func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
+func (s *Simulator) Reset(resetTrafficFlow bool, resetVehicle []*ResetVehicleConfig) (*ResetRes, error) {
 	var reply ResetRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/reset",
-		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow},
+		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow, ResetVehicle: resetVehicle},
 		&reply,
 	)
 	if err != nil {

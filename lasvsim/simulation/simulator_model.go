@@ -44,6 +44,15 @@ func (s StepCode) IsUnpassed() bool {
 type ResetReq struct {
 	SimulationID     string `json:"simulation_id"`
 	ResetTrafficFlow bool   `json:"reset_traffic_flow"`
+	// 设定测试车辆重置时一些行为, reset_traffic_flow=true时生效。
+	ResetVehicle []*ResetVehicleConfig `json:"reset_vehicle"`
+}
+
+type ResetVehicleConfig struct {
+	// 测试车辆ID
+	VehicleId string `json:"vehicle_id"`
+	// 设置指定导航信息
+	LinkPath []string `json:"link_path"`
 }
 
 type ResetRes struct{}
