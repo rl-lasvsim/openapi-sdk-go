@@ -98,11 +98,11 @@ func (s *Simulator) Stop() error {
 	return nil
 }
 
-func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
+func (s *Simulator) Reset(resetTrafficFlow bool, resetVehicle []*ResetVehicleConfig) (*ResetRes, error) {
 	var reply ResetRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/reset",
-		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow},
+		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow, ResetVehicle: resetVehicle},
 		&reply,
 	)
 	if err != nil {
@@ -153,19 +153,6 @@ func (s *Simulator) GetMovementList(junctionId string) (*GetMovementListRes, err
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/map/movement/list/get",
 		&GetMovementListReq{SimulationId: s.SimulationId, JunctionId: junctionId},
-		&reply,
-	)
-	if err != nil {
-		return nil, err
-	}
-	return &reply, nil
-}
-
-func (s *Simulator) NextStage(junctionId string) (*NextStageRes, error) {
-	var reply NextStageRes
-	err := s.httpClient.Post(
-		"/openapi/cosim/v2/simulation/map/movement/list/get",
-		&NextStageReq{SimulationId: s.SimulationId, JunctionId: junctionId},
 		&reply,
 	)
 	if err != nil {
@@ -611,6 +598,19 @@ func (s *Simulator) SetVehicleLocalPaths(vehicleId string, localPaths []*LocalPa
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/local_paths/set",
 		&SetVehicleLocalPathsReq{SimulationId: s.SimulationId, VehicleId: vehicleId, LocalPaths: localPaths, ChooseIdx: chooseIdx},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetIdcVehicleNav(vehicleId string) (*GetIdcVehicleNavRes, error) {
+	var reply GetIdcVehicleNavRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/idc_vehicle_nav/get",
+		&SetVehicleLocalPathsReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
