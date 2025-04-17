@@ -46,6 +46,8 @@ type ResetReq struct {
 	ResetTrafficFlow bool   `json:"reset_traffic_flow"`
 	// 设定测试车辆重置时一些行为, reset_traffic_flow=true时生效。
 	ResetVehicle []*ResetVehicleConfig `json:"reset_vehicle"`
+	// 设定环境车辆、行人、非机动车重置时一些行为, reset_traffic_flow=true时生效。
+	ResetEnvPtcs *ResetEnvPtcs `json:"reset_env_ptcs"`
 }
 
 type ResetVehicleConfig struct {
@@ -53,6 +55,52 @@ type ResetVehicleConfig struct {
 	VehicleId string `json:"vehicle_id"`
 	// 设置指定导航信息
 	LinkPath []string `json:"link_path"`
+}
+
+type ResetEnvPtcs struct {
+	// 环境车辆参数配置
+	VehicleConf *VehicleDistribution `json:"vehicle_conf"`
+	// 行人参数配置
+	PedConf *PedestrianDistribution `json:"ped_conf"`
+	// 非机动车参数配置
+	NmvConf *NMVDistribution `json:"nmv_conf"`
+}
+
+type VehicleDistribution struct {
+	// 密度(范围:0~1)
+	Density float64 `json:"density"`
+	// 期望速度下限, 单位: [m/s]
+	MinTargetSpeed float64 `json:"min_target_speed"`
+	// 期望速度上限, 单位: [m/s]
+	MaxTargetSpeed float64 `json:"max_target_speed"`
+	// 小型车、中型车、大型车的比例(举例: [0.3,0.3,0.4]参数意为30%的小型车、30%的中型车、40%的大型车)
+	SizeRatio []float64 `json:"size_ratio"`
+	// 保守型、适中型、激进型的比例(举例: [0.3,0.3,0.4]参数意为30%的保守型、30%的适中型、40%的激进型)
+	StyleRatio []float64 `json:"style_ratio"`
+	// 生疏型、一般型、熟练型的比例(举例: [0.3,0.3,0.4]参数意为30%的生疏型、30%的一般型、40%的熟练型)
+	SkillRatio []float64 `json:"skill_ratio"`
+}
+
+type PedestrianDistribution struct {
+	// 密度(范围:0~1)
+	Density float64 `json:"density"`
+	// 儿童、成人、老人的比例(举例: [0.3,0.3,0.4]参数意为30%的儿童、30%的成人、40%的老人)
+	AgesRatio []float64 `json:"ages_ratio"`
+	// 保守型、适中型、激进型的比例(举例: [0.3,0.3,0.4]参数意为30%的保守型、30%的适中型、40%的激进型)
+	StyleRatio []float64 `json:"style_ratio"`
+}
+
+type NMVDistribution struct {
+	// 密度(范围:0~1)
+	Density float64 `json:"density"`
+	// 子类型的比例(举例: [0.3,0.7]参数意为30%的电动自行车,70%的三轮车)
+	SubtypeRatio []float64 `json:"subtype_ratio"`
+	// 保守型、适中型、激进型的比例(举例: [0.3,0.3,0.4]参数意为30%的保守型、30%的适中型、40%的激进型)
+	StyleRatio []float64 `json:"style_ratio"`
+	// 期望速度下限, 单位: [m/s]
+	MinTargetSpeed float64 `json:"min_target_speed"`
+	// 期望速度上限, 单位: [m/s]
+	MaxTargetSpeed float64 `json:"max_target_speed"`
 }
 
 type ResetRes struct{}
