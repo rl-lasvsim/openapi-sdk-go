@@ -55,6 +55,8 @@ type ResetVehicleConfig struct {
 	VehicleId string `json:"vehicle_id"`
 	// 设置指定导航信息
 	LinkPath []string `json:"link_path"`
+	// 基于link上的s,t坐标, 设置s范围(在link中的 [0.0, 100.0) 米内随机, 左闭右开)
+	SRange []float64 `json:"s_range"`
 }
 
 type ResetEnvPtcs struct {
