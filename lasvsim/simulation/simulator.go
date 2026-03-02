@@ -98,11 +98,11 @@ func (s *Simulator) Stop() error {
 	return nil
 }
 
-func (s *Simulator) Reset(resetTrafficFlow bool) (*ResetRes, error) {
+func (s *Simulator) Reset(resetTrafficFlow bool, resetVehicle []*ResetVehicleConfig, envPtcConf *ResetEnvPtcs) (*ResetRes, error) {
 	var reply ResetRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/reset",
-		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow},
+		&ResetReq{SimulationID: s.SimulationId, ResetTrafficFlow: resetTrafficFlow, ResetVehicle: resetVehicle, ResetEnvPtcs: envPtcConf},
 		&reply,
 	)
 	if err != nil {
@@ -318,11 +318,11 @@ func (s *Simulator) GetVehicleTargetSpeed(vehicleId string) (*GetVehicleTargetSp
 	return &reply, nil
 }
 
-func (s *Simulator) SetVehiclePlanningInfo(vehicleId string, planningPath []*Point) (*SetVehiclePlanningInfoRes, error) {
+func (s *Simulator) SetVehiclePlanningInfo(vehicleId string, planningPath []*Point, speed []float64) (*SetVehiclePlanningInfoRes, error) {
 	var reply SetVehiclePlanningInfoRes
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/vehicle/planning/set",
-		&SetVehiclePlanningInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, PlanningPath: planningPath},
+		&SetVehiclePlanningInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, PlanningPath: planningPath, Speed: speed},
 		&reply,
 	)
 	if err != nil {
@@ -557,6 +557,84 @@ func (s *Simulator) GetParticipantPosition(participantIdList []string) (*GetPart
 	err := s.httpClient.Post(
 		"/openapi/cosim/v2/simulation/participant/position/get",
 		&GetParticipantPositionReq{SimulationId: s.SimulationId, ParticipantIdList: participantIdList},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetVehicleSensorConfig(vehicleId string) (*GetVehicleSensorConfigRes, error) {
+	var reply GetVehicleSensorConfigRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/sensor_config/get",
+		&GetVehicleSensorConfigReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleRoadPerceptionInfo(vehicleId string, noa *LocalMap) (*SetVehicleRoadPerceptionInfoRes, error) {
+	var reply SetVehicleRoadPerceptionInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/road_perception/set",
+		&SetVehicleRoadPerceptionInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Noa: noa},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleObstaclePerceptionInfo(vehicleId string, obstacles []*Obstacle) (*SetVehicleObstaclePerceptionInfoRes, error) {
+	var reply SetVehicleObstaclePerceptionInfoRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/obstacle_perception/set",
+		&SetVehicleObstaclePerceptionInfoReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Obstacles: obstacles},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleExtraMetrics(vehicleId string, metrics map[string]float64) (*SetVehicleExtraMetricsRes, error) {
+	var reply SetVehicleExtraMetricsRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/extra_metrics/set",
+		&SetVehicleExtraMetricsReq{SimulationId: s.SimulationId, VehicleId: vehicleId, Metrics: metrics},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) SetVehicleLocalPaths(vehicleId string, localPaths []*LocalPath, chooseIdx *int32) (*SetVehicleLocalPathsRes, error) {
+	var reply SetVehicleLocalPathsRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/local_paths/set",
+		&SetVehicleLocalPathsReq{SimulationId: s.SimulationId, VehicleId: vehicleId, LocalPaths: localPaths, ChooseIdx: chooseIdx},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
+func (s *Simulator) GetIdcVehicleNav(vehicleId string) (*GetIdcVehicleNavRes, error) {
+	var reply GetIdcVehicleNavRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/idc_vehicle_nav/get",
+		&SetVehicleLocalPathsReq{SimulationId: s.SimulationId, VehicleId: vehicleId},
 		&reply,
 	)
 	if err != nil {
