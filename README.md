@@ -241,6 +241,9 @@ type Client struct {
 - `SetVehicleDestination(vehicleId string, destination *Point) (*SetVehicleDestinationRes, error)`
   设置车辆目的地
 
+- `SetAEBStatus(vehicleId string, emergencyBraking, firstCollisionWarning, secondCollisionWarning bool) (*SetAEBStatusRes, error)`
+  设置车辆 AEB(自动紧急制动) 状态
+
 - `GetPedIdList() (*GetPedIdListRes, error)`
   获取行人 ID 列表
 

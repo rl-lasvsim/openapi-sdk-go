@@ -409,6 +409,30 @@ func (s *Simulator) SetVehicleDestination(vehicleId string, destination *Point) 
 	return &reply, nil
 }
 
+// SetAEBStatus 设置车辆 AEB(自动紧急制动) 状态
+// vehicleId: 车辆 ID
+// emergencyBraking: 紧急制动状态
+// firstCollisionWarning: 第一次碰撞预警报警
+// secondCollisionWarning: 第二次碰撞预警报警
+func (s *Simulator) SetAEBStatus(vehicleId string, emergencyBraking, firstCollisionWarning, secondCollisionWarning bool) (*SetAEBStatusRes, error) {
+	var reply SetAEBStatusRes
+	err := s.httpClient.Post(
+		"/openapi/cosim/v2/simulation/vehicle/aeb_status",
+		&SetAEBStatusReq{
+			SimulationId:          s.SimulationId,
+			VehicleId:             vehicleId,
+			EmergencyBraking:      emergencyBraking,
+			FirstCollisionWarning: firstCollisionWarning,
+			SecondCollisionWarning: secondCollisionWarning,
+		},
+		&reply,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &reply, nil
+}
+
 // --------- 行人部分 ---------
 func (s *Simulator) GetPedIdList() (*GetPedIdListRes, error) {
 	var reply GetPedIdListRes

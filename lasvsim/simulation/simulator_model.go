@@ -563,3 +563,18 @@ type Movement struct {
 type LaneNav struct {
 	Nav map[int32]string `protobuf:"bytes,1,rep,name=nav,proto3" json:"nav" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
+
+// --------- AEB 高级驾驶辅助 ---------
+type SetAEBStatusReq struct {
+	// 仿真 ID
+	SimulationId string `json:"simulation_id"`
+	// 车辆 ID
+	VehicleId string `json:"vehicle_id"`
+	// 紧急制动状态
+	EmergencyBraking bool `json:"emergency_braking"`
+	// 第一次碰撞预警报警
+	FirstCollisionWarning bool `json:"first_collision_warning"`
+	// 第二次碰撞预警报警
+	SecondCollisionWarning bool `json:"second_collision_warning"`
+}
+type SetAEBStatusRes struct{}
